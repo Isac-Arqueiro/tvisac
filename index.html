@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <title>IPTV Player - Estilo Pluto TV</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background-color: #000; color: #fff; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+
     .container {
       display: flex;
       height: calc(100vh - 50px);
     }
+
     .sidebar {
       width: 300px;
       background-color: #111;
@@ -18,11 +30,13 @@
       border-right: 1px solid #333;
       padding: 10px;
     }
+
     .sidebar h2 {
       margin-bottom: 10px;
       font-size: 20px;
       text-align: center;
     }
+
     .search-container {
       display: flex;
       align-items: center;
@@ -31,6 +45,7 @@
       border-radius: 5px;
       padding: 5px;
     }
+
     .search-container input {
       flex: 1;
       background: transparent;
@@ -39,14 +54,17 @@
       font-size: 14px;
       padding: 5px;
     }
+
     .search-container input::placeholder {
       color: #888;
     }
+
     .search-icon {
       margin-right: 5px;
       font-size: 16px;
       color: #888;
     }
+
     .channel {
       display: flex;
       align-items: center;
@@ -55,21 +73,26 @@
       border-bottom: 1px solid #222;
       outline: none;
     }
+
     .channel:focus {
       background-color: #333;
     }
+
     .channel:hover {
       background-color: #222;
     }
+
     .channel img {
       width: 50px;
       height: 50px;
       margin-right: 10px;
       object-fit: contain;
     }
+
     .channel-name {
       font-size: 16px;
     }
+
     .main {
       flex: 1;
       display: flex;
@@ -78,12 +101,14 @@
       background-color: #000;
       position: relative;
     }
+
     video {
       width: 100%;
       height: 100%;
       background-color: #000;
       cursor: pointer;
     }
+
     .top-bar {
       padding: 10px;
       background-color: #1c1c1c;
@@ -92,15 +117,18 @@
       align-items: center;
       height: 50px;
     }
+
     .top-bar button {
       padding: 8px 15px;
       font-size: 14px;
       cursor: pointer;
     }
+
     #m3uUrlInput {
       display: none;
       flex: 1;
     }
+
     .favorite-btn {
       margin-left: auto;
       font-size: 20px;
@@ -109,9 +137,11 @@
       border: none;
       cursor: pointer;
     }
+
     .favorite-btn.not-fav {
       color: #555;
     }
+
     .player-controls {
       position: absolute;
       bottom: 20px;
@@ -121,20 +151,23 @@
       gap: 20px;
       z-index: 10;
     }
+
     .player-controls button {
       padding: 10px 20px;
       font-size: 16px;
-      background-color: rgba(0,0,0,0.6);
+      background-color: rgba(0, 0, 0, 0.6);
       border: none;
       color: white;
       cursor: pointer;
       border-radius: 4px;
     }
+
     .player-controls.show {
       display: flex;
     }
   </style>
 </head>
+
 <body>
   <div class="top-bar">
     <button onclick="handleUrlButton()">URL</button>
@@ -156,6 +189,7 @@
       <div class="player-controls" id="playerControls">
         <button onclick="previousChannel()">⏮️ Voltar</button>
         <button onclick="nextChannel()">Próximo ⏭️</button>
+        <button onclick="exitFullscreen()">Menu 📺</button>
       </div>
     </div>
   </div>
@@ -223,7 +257,7 @@
             const logo = logoMatch ? logoMatch[1] : '';
             const streamUrl = lines[i + 1]?.trim();
             if (streamUrl && streamUrl.startsWith('http')) {
-              channels.push({ name, logo, streamUrl });
+              channels.push({name, logo, streamUrl});
             }
           }
         }
@@ -286,7 +320,6 @@
           renderChannelList(channels);
         };
 
-        // Permite ativar/desativar favorito com Enter no botão
         favBtn.onkeydown = (e) => {
           if (e.key === 'Enter') {
             favBtn.click();
@@ -297,6 +330,7 @@
           currentIndex = allChannels.findIndex(c => c.streamUrl === channel.streamUrl);
           playChannel(channel.streamUrl);
           div.focus();
+          openFullscreen(video); // ✅ Tela cheia ao clicar no canal
         };
 
         div.onkeydown = (e) => {
@@ -332,6 +366,22 @@
       }
     }
 
+    function openFullscreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    }
+
+    function exitFullscreen() {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+    }
+
     video.addEventListener('click', () => {
       playerControls.classList.add('show');
       clearTimeout(window._hideControls);
@@ -340,7 +390,6 @@
       }, 3000);
     });
 
-    // Duplo clique para fullscreen toggle
     video.addEventListener('dblclick', () => {
       if (document.fullscreenElement) {
         document.exitFullscreen();
@@ -353,7 +402,6 @@
       renderChannelList(allChannels);
     });
 
-    // Carrega URL da lista ao iniciar, se houver
     const savedUrl = localStorage.getItem('m3uUrl');
     if (savedUrl) {
       loadPlaylist(savedUrl);
@@ -362,4 +410,5 @@
     }
   </script>
 </body>
+
 </html>
