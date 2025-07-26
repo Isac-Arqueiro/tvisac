@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>IPTV Player - Estilo Pluto TV</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
@@ -16,27 +16,86 @@
       font-family: sans-serif;
       background-color: #000;
       color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Centraliza o botão Senha do Cliente no centro da tela */
+    #senhaClienteSection {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #senhaClienteInput {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      width: 200px;
+      text-align: center;
+    }
+
+    #senhaClienteBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      background-color: #1c1c1c;
+      border: 1px solid #444;
+      color: white;
+      width: 200px;
+    }
+
+    /* Container principal com sidebar e main */
     .container {
       display: flex;
-      height: calc(100vh - 50px);
+      height: calc(100vh - 0px);
+      flex: 1;
     }
 
+    /* Sidebar com lista de canais */
     .sidebar {
       width: 300px;
       background-color: #111;
       overflow-y: auto;
       border-right: 1px solid #333;
       padding: 10px;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Botão "Usar lista salva" alinhado à esquerda acima do título Canais */
+    #usarListaBtn {
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      background-color: #222;
+      border: 1px solid #444;
+      color: white;
+      user-select: none;
+    }
+
+    #usarListaBtn:hover {
+      background-color: #333;
+    }
+
+    /* Título canais */
     .sidebar h2 {
       margin-bottom: 10px;
       font-size: 20px;
-      text-align: center;
+      text-align: left;
+      user-select: none;
     }
 
+    /* Pesquisa canais */
     .search-container {
       display: flex;
       align-items: center;
@@ -44,6 +103,7 @@
       background-color: #222;
       border-radius: 5px;
       padding: 5px;
+      color: white;
     }
 
     .search-container input {
@@ -59,12 +119,7 @@
       color: #888;
     }
 
-    .search-icon {
-      margin-right: 5px;
-      font-size: 16px;
-      color: #888;
-    }
-
+    /* Lista de canais */
     .channel {
       display: flex;
       align-items: center;
@@ -91,8 +146,25 @@
 
     .channel-name {
       font-size: 16px;
+      flex: 1;
+      user-select: none;
     }
 
+    .favorite-btn {
+      margin-left: auto;
+      font-size: 20px;
+      color: gold;
+      background: none;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .favorite-btn.not-fav {
+      color: #555;
+    }
+
+    /* Área do player */
     .main {
       flex: 1;
       display: flex;
@@ -107,42 +179,10 @@
       height: 100%;
       background-color: #000;
       cursor: pointer;
+      user-select: none;
     }
 
-    .top-bar {
-      padding: 10px;
-      background-color: #1c1c1c;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      height: 50px;
-    }
-
-    .top-bar button {
-      padding: 8px 15px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    #m3uUrlInput {
-      display: none;
-      flex: 1;
-    }
-
-    .favorite-btn {
-      margin-left: auto;
-      font-size: 20px;
-      color: gold;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .favorite-btn.not-fav {
-      color: #555;
-    }
-
-    /* ✅ CONTROLES CENTRALIZADOS */
+    /* Controles centralizados no player */
     .player-controls {
       position: absolute;
       top: 50%;
@@ -161,27 +201,31 @@
       color: white;
       cursor: pointer;
       border-radius: 4px;
+      user-select: none;
     }
 
     .player-controls.show {
       display: flex;
     }
+
   </style>
 </head>
 
 <body>
-  <div class="top-bar">
-    <button onclick="handleUrlButton()">URL</button>
-    <input type="text" id="m3uUrlInput" placeholder="Cole a nova URL da lista M3U">
-    <button id="loadBtn" onclick="saveAndLoad()" style="display:none;">Carregar</button>
+  <!-- Tela inicial de senha cliente (aparece se não houver senha válida) -->
+  <div id="senhaClienteSection">
+    <input id="senhaClienteInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" />
+    <button id="senhaClienteBtn">Entrar</button>
+    <small style="color:#888; margin-top:10px;">Bem Vindo</small>
   </div>
 
-  <div class="container">
+  <!-- Container principal: sidebar + player, escondido inicialmente -->
+  <div class="container" style="display:none;">
     <div class="sidebar">
+      <button id="usarListaBtn">Usar lista salva</button>
       <h2>Canais</h2>
       <div class="search-container">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Pesquisar canal...">
+        🔍<input type="text" id="searchInput" placeholder="Pesquisar canal..." autocomplete="off" />
       </div>
       <div id="channelList"></div>
     </div>
@@ -196,53 +240,65 @@
   </div>
 
   <script>
+    const senhaClienteSection = document.getElementById('senhaClienteSection');
+    const senhaClienteInput = document.getElementById('senhaClienteInput');
+    const senhaClienteBtn = document.getElementById('senhaClienteBtn');
+
+    const container = document.querySelector('.container');
+    const usarListaBtn = document.getElementById('usarListaBtn');
+
     const video = document.getElementById('video');
     const channelListDiv = document.getElementById('channelList');
-    const m3uUrlInput = document.getElementById('m3uUrlInput');
-    const loadBtn = document.getElementById('loadBtn');
-    const playerControls = document.getElementById('playerControls');
     const searchInput = document.getElementById('searchInput');
+    const playerControls = document.getElementById('playerControls');
 
+    // Senhas clientes válidas
+    const validClientPasswords = ['8888', '9999'];
+    // Senha para liberar a lista salva
+    const savedListPassword = '0000';
+
+    // Para bloquear após 3 tentativas erradas por 10 minutos
+    const maxAttempts = 3;
+    const lockTimeMs = 10 * 60 * 1000; // 10 minutos em ms
+
+    let attempts = 0;
+    let lockUntil = 0;
+
+    // Canais e estado
+    let allChannels = [];
     let channelElements = [];
     let currentIndex = 0;
-    let allChannels = [];
 
-    function playChannel(url) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.play();
-      } else {
-        alert('Seu navegador não suporta HLS');
+    // Checa se existe senha cliente salva válida
+    function checkSavedClientPassword() {
+      const saved = localStorage.getItem('clientPassword');
+      if (saved && validClientPasswords.includes(saved)) {
+        return saved;
       }
+      return null;
     }
 
-    function handleUrlButton() {
-      const senha = prompt("Digite a senha para alterar a URL:");
-      if (senha === "135798642") {
-        m3uUrlInput.style.display = "block";
-        loadBtn.style.display = "inline-block";
-      } else {
-        alert("Senha incorreta.");
-      }
+    // Função para mostrar a interface principal
+    function showMainUI() {
+      senhaClienteSection.style.display = 'none';
+      container.style.display = 'flex';
+      loadPlaylist(playlistUrl); // carrega a lista salva
     }
 
-    function saveAndLoad() {
-      const url = m3uUrlInput.value.trim();
-      if (!url) {
-        alert("Cole uma URL válida da lista M3U.");
-        return;
-      }
-      localStorage.setItem('m3uUrl', url);
-      m3uUrlInput.style.display = "none";
-      loadBtn.style.display = "none";
-      loadPlaylist(url);
+    // Função para bloquear input após 3 erros
+    function isLocked() {
+      const lockedTime = parseInt(localStorage.getItem('lockUntil') || '0', 10);
+      return Date.now() < lockedTime;
     }
 
+    function setLock() {
+      localStorage.setItem('lockUntil', Date.now() + lockTimeMs);
+    }
+
+    // URL da playlist fixa
+    const playlistUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
+
+    // Função que carrega a playlist
     async function loadPlaylist(url) {
       try {
         const response = await fetch(url);
@@ -268,39 +324,30 @@
         if (channels.length > 0) {
           currentIndex = 0;
           playChannel(channels[0].streamUrl);
-          channelElements[0].focus();
+          channelElements[0]?.focus();
         }
-
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao carregar a lista. Verifique se a URL está correta e com CORS liberado.");
+      } catch (e) {
+        alert('Erro ao carregar a lista. Verifique a conexão e o CORS.');
+        console.error(e);
       }
     }
 
-    function toggleFavorite(streamUrl) {
-      let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-      if (favorites.includes(streamUrl)) {
-        favorites = favorites.filter(url => url !== streamUrl);
-      } else {
-        favorites.push(streamUrl);
-      }
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-
+    // Renderiza a lista de canais (filtra pelo search)
     function renderChannelList(channels) {
-      const searchTerm = searchInput.value.toLowerCase();
-      const filtered = channels.filter(c => c.name.toLowerCase().includes(searchTerm));
+      const term = searchInput.value.toLowerCase();
+      const filtered = channels.filter(c => c.name.toLowerCase().includes(term));
 
       channelListDiv.innerHTML = '';
       channelElements = [];
 
       const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-      const favoriteChannels = filtered.filter(c => favorites.includes(c.streamUrl));
+      // Prioriza favoritos
+      const favChannels = filtered.filter(c => favorites.includes(c.streamUrl));
       const normalChannels = filtered.filter(c => !favorites.includes(c.streamUrl));
-      const combinedList = [...favoriteChannels, ...normalChannels];
+      const combined = [...favChannels, ...normalChannels];
 
-      combinedList.forEach((channel, index) => {
+      combined.forEach((channel, idx) => {
         const isFav = favorites.includes(channel.streamUrl);
         const div = document.createElement('div');
         div.className = 'channel';
@@ -308,41 +355,37 @@
 
         const favClass = isFav ? '' : 'not-fav';
         div.innerHTML = `
-          <img src="${channel.logo}" alt="">
+          <img src="${channel.logo}" alt="Logo do canal" />
           <span class="channel-name">${channel.name}</span>
           <button class="favorite-btn ${favClass}" title="Favorito">${isFav ? '★' : '☆'}</button>
         `;
 
+        // Favoritar canal
         const favBtn = div.querySelector('.favorite-btn');
-
-        favBtn.onclick = (e) => {
+        favBtn.onclick = e => {
           e.stopPropagation();
           toggleFavorite(channel.streamUrl);
           renderChannelList(channels);
         };
-
-        favBtn.onkeydown = (e) => {
-          if (e.key === 'Enter') {
-            favBtn.click();
+        favBtn.onkeydown = e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleFavorite(channel.streamUrl);
+            renderChannelList(channels);
           }
         };
 
+        // Selecionar canal para tocar
         div.onclick = () => {
           currentIndex = allChannels.findIndex(c => c.streamUrl === channel.streamUrl);
           playChannel(channel.streamUrl);
-          div.focus();
-          openFullscreen(video); // ✅ Tela cheia ao clicar no canal
         };
 
-        div.onkeydown = (e) => {
-          if (e.key === 'ArrowDown') {
-            if (index + 1 < channelElements.length) channelElements[index + 1].focus();
-          } else if (e.key === 'ArrowUp') {
-            if (index - 1 >= 0) channelElements[index - 1].focus();
-          } else if (e.key === 'Enter') {
-            div.click();
-          } else if (e.key === 'ArrowRight') {
-            favBtn?.focus();
+        div.onkeydown = e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            currentIndex = allChannels.findIndex(c => c.streamUrl === channel.streamUrl);
+            playChannel(channel.streamUrl);
           }
         };
 
@@ -351,64 +394,119 @@
       });
     }
 
-    function previousChannel() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        playChannel(allChannels[currentIndex].streamUrl);
-        channelElements[currentIndex]?.focus();
-      }
-    }
-
-    function nextChannel() {
-      if (currentIndex < allChannels.length - 1) {
-        currentIndex++;
-        playChannel(allChannels[currentIndex].streamUrl);
-        channelElements[currentIndex]?.focus();
-      }
-    }
-
-    function openFullscreen(element) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    }
-
-    function exitFullscreen() {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-    }
-
-    video.addEventListener('click', () => {
-      playerControls.classList.add('show');
-      clearTimeout(window._hideControls);
-      window._hideControls = setTimeout(() => {
-        playerControls.classList.remove('show');
-      }, 3000);
-    });
-
-    video.addEventListener('dblclick', () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
+    // Favoritos
+    function toggleFavorite(streamUrl) {
+      let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      if (favorites.includes(streamUrl)) {
+        favorites = favorites.filter(f => f !== streamUrl);
       } else {
-        video.requestFullscreen();
+        favorites.push(streamUrl);
       }
-    });
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
 
+    // Player com HLS.js fallback
+    function playChannel(url) {
+      if (Hls.isSupported()) {
+        if (window.hls) {
+          window.hls.destroy();
+          window.hls = null;
+        }
+        window.hls = new Hls();
+        window.hls.loadSource(url);
+        window.hls.attachMedia(video);
+        window.hls.on(Hls.Events.ERROR, function (event, data) {
+          console.error('HLS error', data);
+        });
+        window.hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play();
+      } else {
+        alert('Seu navegador não suporta reprodução HLS');
+      }
+    }
+
+    // Navegação canais
+    function nextChannel() {
+      if (allChannels.length === 0) return;
+      currentIndex = (currentIndex + 1) % allChannels.length;
+      playChannel(allChannels[currentIndex].streamUrl);
+      channelElements[currentIndex]?.focus();
+    }
+
+    function previousChannel() {
+      if (allChannels.length === 0) return;
+      currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+      playChannel(allChannels[currentIndex].streamUrl);
+      channelElements[currentIndex]?.focus();
+    }
+
+    // Sair para o menu (mostra a tela de senha do cliente)
+    function exitFullscreen() {
+      container.style.display = 'none';
+      senhaClienteSection.style.display = 'flex';
+      senhaClienteInput.value = '';
+      senhaClienteInput.focus();
+      localStorage.removeItem('clientPassword'); // Para forçar nova senha na próxima
+    }
+
+    // Filtragem ao digitar na pesquisa
     searchInput.addEventListener('input', () => {
       renderChannelList(allChannels);
     });
 
-    const savedUrl = localStorage.getItem('m3uUrl');
-    if (savedUrl) {
-      loadPlaylist(savedUrl);
-    } else {
-      alert("Nenhuma lista carregada. Use o botão 'URL' ");
-    }
+    // Verifica senha do cliente
+    senhaClienteBtn.onclick = () => {
+      if (isLocked()) {
+        const remain = Math.ceil((lockUntil - Date.now()) / 1000);
+        alert(`Você errou a senha 3 vezes. Aguarde ${Math.ceil(remain / 60)} minutos para tentar de novo.`);
+        return;
+      }
+
+      const entered = senhaClienteInput.value.trim();
+      if (validClientPasswords.includes(entered)) {
+        // Senha válida
+        localStorage.setItem('clientPassword', entered);
+        attempts = 0;
+        localStorage.removeItem('lockUntil');
+        showMainUI();
+      } else {
+        attempts++;
+        alert(`Senha incorreta! Tentativa ${attempts} de ${maxAttempts}`);
+        if (attempts >= maxAttempts) {
+          setLock();
+          alert('Você errou a senha 3 vezes. Aguarde 10 minutos para tentar novamente.');
+        }
+      }
+      senhaClienteInput.value = '';
+      senhaClienteInput.focus();
+    };
+
+    // Botão "Usar lista salva" pede senha 0000 para liberar
+    usarListaBtn.onclick = () => {
+      const senha = prompt('Digite a senha para usar lista salva:');
+      if (senha === savedListPassword) {
+        alert('Lista salva liberada! (Essa funcionalidade pode ser implementada)');
+        // Aqui você pode implementar a lógica para usar lista salva do sistema.
+        // No momento, só alerta.
+      } else {
+        alert('Senha incorreta para lista salva.');
+      }
+    };
+
+    // Ao carregar a página, verifica se existe senha cliente salva
+    window.onload = () => {
+      const savedPwd = checkSavedClientPassword();
+      if (savedPwd) {
+        showMainUI();
+      } else {
+        senhaClienteInput.focus();
+      }
+    };
+
   </script>
 </body>
 
