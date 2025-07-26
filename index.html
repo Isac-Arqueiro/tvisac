@@ -1,232 +1,53 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
   <title>IPTV Player - Estilo Pluto TV</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: sans-serif;
-      background-color: #000;
-      color: #fff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Centraliza o botão Senha do Cliente no centro da tela */
-    #senhaClienteSection {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #senhaClienteInput {
-      padding: 8px;
-      font-size: 16px;
-      border-radius: 4px;
-      border: none;
-      width: 200px;
-      text-align: center;
-    }
-
-    #senhaClienteBtn {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      background-color: #1c1c1c;
-      border: 1px solid #444;
-      color: white;
-      width: 200px;
-    }
-
-    /* Container principal com sidebar e main */
-    .container {
-      display: flex;
-      height: calc(100vh - 0px);
-      flex: 1;
-    }
-
-    /* Sidebar com lista de canais */
-    .sidebar {
-      width: 300px;
-      background-color: #111;
-      overflow-y: auto;
-      border-right: 1px solid #333;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Botão "Usar lista salva" alinhado à esquerda acima do título Canais */
-    #usarListaBtn {
-      margin-bottom: 10px;
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      background-color: #222;
-      border: 1px solid #444;
-      color: white;
-      user-select: none;
-    }
-
-    #usarListaBtn:hover {
-      background-color: #333;
-    }
-
-    /* Título canais */
-    .sidebar h2 {
-      margin-bottom: 10px;
-      font-size: 20px;
-      text-align: left;
-      user-select: none;
-    }
-
-    /* Pesquisa canais */
-    .search-container {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      background-color: #222;
-      border-radius: 5px;
-      padding: 5px;
-      color: white;
-    }
-
-    .search-container input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 14px;
-      padding: 5px;
-    }
-
-    .search-container input::placeholder {
-      color: #888;
-    }
-
-    /* Lista de canais */
-    .channel {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      cursor: pointer;
-      border-bottom: 1px solid #222;
-      outline: none;
-    }
-
-    .channel:focus {
-      background-color: #333;
-    }
-
-    .channel:hover {
-      background-color: #222;
-    }
-
-    .channel img {
-      width: 50px;
-      height: 50px;
-      margin-right: 10px;
-      object-fit: contain;
-    }
-
-    .channel-name {
-      font-size: 16px;
-      flex: 1;
-      user-select: none;
-    }
-
-    .favorite-btn {
-      margin-left: auto;
-      font-size: 20px;
-      color: gold;
-      background: none;
-      border: none;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .favorite-btn.not-fav {
-      color: #555;
-    }
-
-    /* Área do player */
-    .main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #000;
-      position: relative;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    /* Controles centralizados no player */
-    .player-controls {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: none;
-      gap: 20px;
-      z-index: 10;
-    }
-
-    .player-controls button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: rgba(0, 0, 0, 0.6);
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 4px;
-      user-select: none;
-    }
-
-    .player-controls.show {
-      display: flex;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; }
+    #senhaClienteSection { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+    #senhaClienteInput { padding: 8px; font-size: 16px; width: 200px; border-radius: 4px; border: none; text-align: center; }
+    #senhaClienteBtn { padding: 10px 20px; font-size: 16px; width: 200px; background: #1c1c1c; border: 1px solid #444; color: #fff; border-radius: 4px; cursor: pointer; }
+    .container { display: none; flex: 1; flex-direction: row; }
+    .sidebar { width: 300px; background: #111; padding: 10px; display: flex; flex-direction: column; }
+    .top-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+    .top-buttons button { flex: 1; padding: 8px; font-size: 14px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; cursor: pointer; user-select: none; }
+    .top-buttons button:hover { background: #333; }
+    .sidebar h2 { margin-bottom: 10px; font-size: 20px; }
+    .search-container { display: flex; align-items: center; background: #222; padding: 5px; border-radius: 5px; margin-bottom: 10px; }
+    .search-container input { flex: 1; background: transparent; border: none; color: #fff; font-size: 14px; padding: 5px; }
+    .search-container input::placeholder { color: #888; }
+    .channel { display: flex; align-items: center; padding: 8px; cursor: pointer; border-bottom: 1px solid #222; }
+    .channel:hover, .channel:focus { background: #222; outline: none; }
+    .channel img { width: 50px; height: 50px; object-fit: contain; margin-right: 10px; }
+    .channel-name { font-size: 16px; flex: 1; }
+    .favorite-btn { margin-left: auto; font-size: 20px; color: gold; background: none; border: none; cursor: pointer; }
+    .favorite-btn.not-fav { color: #555; }
+    .main { flex: 1; position: relative; }
+    video { width: 100%; height: 100%; background: #000; cursor: pointer; }
+    .player-controls { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; gap: 20px; z-index: 10; }
+    .player-controls button { padding: 10px 20px; font-size: 16px; background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 4px; cursor: pointer; }
+    .player-controls.show { display: flex; }
   </style>
 </head>
-
 <body>
-  <!-- Tela inicial de senha cliente (aparece se não houver senha válida) -->
+
   <div id="senhaClienteSection">
     <input id="senhaClienteInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" />
     <button id="senhaClienteBtn">Entrar</button>
-    <small style="color:#888; margin-top:10px;">Bem Vindo</small>
+    <small style="color:#888;">Bem Vindo</small>
   </div>
 
-  <!-- Container principal: sidebar + player, escondido inicialmente -->
-  <div class="container" style="display:none;">
+  <div class="container">
     <div class="sidebar">
-      <button id="usarListaBtn">Usar lista salva</button>
-      <h2>Canais</h2>
-      <div class="search-container">
-        🔍<input type="text" id="searchInput" placeholder="Pesquisar canal..." autocomplete="off" />
+      <div class="top-buttons">
+        <button id="usarListaBtn">Usar lista salva</button>
+        <button id="vipListaBtn">Lista Vip</button>
       </div>
+      <h2>Canais</h2>
+      <div class="search-container">🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" /></div>
       <div id="channelList"></div>
     </div>
     <div class="main">
@@ -239,275 +60,136 @@
     </div>
   </div>
 
-  <script>
-    const senhaClienteSection = document.getElementById('senhaClienteSection');
-    const senhaClienteInput = document.getElementById('senhaClienteInput');
-    const senhaClienteBtn = document.getElementById('senhaClienteBtn');
+<script>
+  const validClientPasswords = ['8888','9999'];
+  const savedListPassword = '0000';
+  const vipListPassword = '0000';
+  const playlistUrl = 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8';
+  const vipPlaylistUrl = 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal.m3u';
 
-    const container = document.querySelector('.container');
-    const usarListaBtn = document.getElementById('usarListaBtn');
+  const senhaClienteInput = document.getElementById('senhaClienteInput');
+  const senhaClienteBtn = document.getElementById('senhaClienteBtn');
+  const senhaClienteSection = document.getElementById('senhaClienteSection');
+  const container = document.querySelector('.container');
+  const usarListaBtn = document.getElementById('usarListaBtn');
+  const vipListaBtn = document.getElementById('vipListaBtn');
+  const searchInput = document.getElementById('searchInput');
+  const channelListDiv = document.getElementById('channelList');
+  const video = document.getElementById('video');
+  const playerControls = document.getElementById('playerControls');
 
-    const video = document.getElementById('video');
-    const channelListDiv = document.getElementById('channelList');
-    const searchInput = document.getElementById('searchInput');
-    const playerControls = document.getElementById('playerControls');
+  let allChannels = [], channelEls = [], currentIndex = 0;
 
-    // Senhas clientes válidas
-    const validClientPasswords = ['8888', '9999'];
-    // Senha para liberar a lista salva
-    const savedListPassword = '0000';
+  // Verifica login salvo
+  if (localStorage.getItem('clientPassword')) {
+    showMainUI();
+  }
 
-    // Para bloquear após 3 tentativas erradas por 10 minutos
-    const maxAttempts = 3;
-    const lockTimeMs = 10 * 60 * 1000; // 10 minutos em ms
-
-    let attempts = 0;
-    let lockUntil = 0;
-
-    // Canais e estado
-    let allChannels = [];
-    let channelElements = [];
-    let currentIndex = 0;
-
-    // Checa se existe senha cliente salva válida
-    function checkSavedClientPassword() {
-      const saved = localStorage.getItem('clientPassword');
-      if (saved && validClientPasswords.includes(saved)) {
-        return saved;
-      }
-      return null;
+  senhaClienteBtn.onclick = () => {
+    const val = senhaClienteInput.value.trim();
+    if (validClientPasswords.includes(val)) {
+      localStorage.setItem('clientPassword', val);
+      showMainUI();
+    } else {
+      alert('Senha inválida.');
     }
+    senhaClienteInput.value = '';
+  };
 
-    // Função para mostrar a interface principal
-    function showMainUI() {
-      senhaClienteSection.style.display = 'none';
-      container.style.display = 'flex';
-      loadPlaylist(playlistUrl); // carrega a lista salva
-    }
+  usarListaBtn.onclick = () => {
+    const val = prompt('Senha para lista salva:');
+    if (val === savedListPassword) loadAndSavePlaylist(playlistUrl);
+    else alert('Senha incorreta.');
+  };
 
-    // Função para bloquear input após 3 erros
-    function isLocked() {
-      const lockedTime = parseInt(localStorage.getItem('lockUntil') || '0', 10);
-      return Date.now() < lockedTime;
-    }
+  vipListaBtn.onclick = () => {
+    const val = prompt('Senha para lista VIP:');
+    if (val === vipListPassword) loadAndSavePlaylist(vipPlaylistUrl);
+    else alert('Senha incorreta.');
+  };
 
-    function setLock() {
-      localStorage.setItem('lockUntil', Date.now() + lockTimeMs);
-    }
+  function showMainUI() {
+    senhaClienteSection.style.display = 'none';
+    container.style.display = 'flex';
+  }
 
-    // URL da playlist fixa
-    const playlistUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
-
-    // Função que carrega a playlist
-    async function loadPlaylist(url) {
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const lines = text.split('\n');
-        const channels = [];
-
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith('#EXTINF')) {
-            const nameMatch = lines[i].match(/,(.*)/);
-            const logoMatch = lines[i].match(/tvg-logo="(.*?)"/);
-            const name = nameMatch ? nameMatch[1] : 'Sem nome';
-            const logo = logoMatch ? logoMatch[1] : '';
-            const streamUrl = lines[i + 1]?.trim();
-            if (streamUrl && streamUrl.startsWith('http')) {
-              channels.push({ name, logo, streamUrl });
-            }
-          }
+  async function loadAndSavePlaylist(url) {
+    try {
+      const res = await fetch(url);
+      const text = await res.text();
+      const lines = text.split('\n');
+      const list = [];
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('#EXTINF') && lines[i+1]?.trim().startsWith('http')) {
+          const name = (lines[i].match(/,(.*)/)||[])[1] || 'Sem nome';
+          const logo = (lines[i].match(/tvg-logo="(.*?)"/)||[])[1] || '';
+          list.push({ name, logo, streamUrl: lines[i+1].trim() });
         }
-
-        allChannels = channels;
-        renderChannelList(channels);
-        if (channels.length > 0) {
-          currentIndex = 0;
-          playChannel(channels[0].streamUrl);
-          channelElements[0]?.focus();
-        }
-      } catch (e) {
-        alert('Erro ao carregar a lista. Verifique a conexão e o CORS.');
-        console.error(e);
       }
+      allChannels = list;
+      renderChannelList(list);
+      if (list.length) playChannel(list[0].streamUrl);
+      localStorage.setItem('listaUsada_' + url, 'true');
+    } catch {
+      alert('Erro ao carregar playlist.');
     }
+  }
 
-    // Renderiza a lista de canais (filtra pelo search)
-    function renderChannelList(channels) {
-      const term = searchInput.value.toLowerCase();
-      const filtered = channels.filter(c => c.name.toLowerCase().includes(term));
-
-      channelListDiv.innerHTML = '';
-      channelElements = [];
-
-      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-      // Prioriza favoritos
-      const favChannels = filtered.filter(c => favorites.includes(c.streamUrl));
-      const normalChannels = filtered.filter(c => !favorites.includes(c.streamUrl));
-      const combined = [...favChannels, ...normalChannels];
-
-      combined.forEach((channel, idx) => {
-        const isFav = favorites.includes(channel.streamUrl);
-        const div = document.createElement('div');
-        div.className = 'channel';
-        div.tabIndex = 0;
-
-        const favClass = isFav ? '' : 'not-fav';
-        div.innerHTML = `
-          <img src="${channel.logo}" alt="Logo do canal" />
-          <span class="channel-name">${channel.name}</span>
-          <button class="favorite-btn ${favClass}" title="Favorito">${isFav ? '★' : '☆'}</button>
-        `;
-
-        // Favoritar canal
-        const favBtn = div.querySelector('.favorite-btn');
-        favBtn.onclick = e => {
-          e.stopPropagation();
-          toggleFavorite(channel.streamUrl);
-          renderChannelList(channels);
-        };
-        favBtn.onkeydown = e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleFavorite(channel.streamUrl);
-            renderChannelList(channels);
-          }
-        };
-
-        // Selecionar canal para tocar
-        div.onclick = () => {
-          currentIndex = allChannels.findIndex(c => c.streamUrl === channel.streamUrl);
-          playChannel(channel.streamUrl);
-        };
-
-        div.onkeydown = e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            currentIndex = allChannels.findIndex(c => c.streamUrl === channel.streamUrl);
-            playChannel(channel.streamUrl);
-          }
-        };
-
-        channelListDiv.appendChild(div);
-        channelElements.push(div);
-      });
-    }
-
-    // Favoritos
-    function toggleFavorite(streamUrl) {
-      let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-      if (favorites.includes(streamUrl)) {
-        favorites = favorites.filter(f => f !== streamUrl);
-      } else {
-        favorites.push(streamUrl);
-      }
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-
-    // Player com HLS.js fallback
-    function playChannel(url) {
-      if (Hls.isSupported()) {
-        if (window.hls) {
-          window.hls.destroy();
-          window.hls = null;
-        }
-        window.hls = new Hls();
-        window.hls.loadSource(url);
-        window.hls.attachMedia(video);
-        window.hls.on(Hls.Events.ERROR, function (event, data) {
-          console.error('HLS error', data);
-        });
-        window.hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.play();
-      } else {
-        alert('Seu navegador não suporta reprodução HLS');
-      }
-    }
-
-    // Navegação canais
-    function nextChannel() {
-      if (allChannels.length === 0) return;
-      currentIndex = (currentIndex + 1) % allChannels.length;
-      playChannel(allChannels[currentIndex].streamUrl);
-      channelElements[currentIndex]?.focus();
-    }
-
-    function previousChannel() {
-      if (allChannels.length === 0) return;
-      currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
-      playChannel(allChannels[currentIndex].streamUrl);
-      channelElements[currentIndex]?.focus();
-    }
-
-    // Sair para o menu (mostra a tela de senha do cliente)
-    function exitFullscreen() {
-      container.style.display = 'none';
-      senhaClienteSection.style.display = 'flex';
-      senhaClienteInput.value = '';
-      senhaClienteInput.focus();
-      localStorage.removeItem('clientPassword'); // Para forçar nova senha na próxima
-    }
-
-    // Filtragem ao digitar na pesquisa
-    searchInput.addEventListener('input', () => {
-      renderChannelList(allChannels);
+  function renderChannelList(list) {
+    const term = searchInput.value.toLowerCase();
+    channelListDiv.innerHTML = '';
+    channelEls = [];
+    list.filter(c => c.name.toLowerCase().includes(term)).forEach((ch, i) => {
+      const div = document.createElement('div');
+      div.className = 'channel';
+      div.tabIndex = 0;
+      div.innerHTML = `<img src="${ch.logo}" alt=""><span class="channel-name">${ch.name}</span>`;
+      div.onclick = () => { currentIndex = i; playChannel(ch.streamUrl); };
+      div.onkeydown = e => { if (e.key === 'Enter') div.click(); };
+      channelListDiv.appendChild(div);
+      channelEls.push(div);
     });
+  }
 
-    // Verifica senha do cliente
-    senhaClienteBtn.onclick = () => {
-      if (isLocked()) {
-        const remain = Math.ceil((lockUntil - Date.now()) / 1000);
-        alert(`Você errou a senha 3 vezes. Aguarde ${Math.ceil(remain / 60)} minutos para tentar de novo.`);
-        return;
-      }
+  function playChannel(url) {
+    if (Hls.isSupported()) {
+      if (window.hls) window.hls.destroy();
+      window.hls = new Hls();
+      window.hls.loadSource(url);
+      window.hls.attachMedia(video);
+      window.hls.on(Hls.Events.MANIFEST_PARSED, ()=> video.play());
+    } else {
+      video.src = url;
+      video.play();
+    }
+  }
 
-      const entered = senhaClienteInput.value.trim();
-      if (validClientPasswords.includes(entered)) {
-        // Senha válida
-        localStorage.setItem('clientPassword', entered);
-        attempts = 0;
-        localStorage.removeItem('lockUntil');
-        showMainUI();
-      } else {
-        attempts++;
-        alert(`Senha incorreta! Tentativa ${attempts} de ${maxAttempts}`);
-        if (attempts >= maxAttempts) {
-          setLock();
-          alert('Você errou a senha 3 vezes. Aguarde 10 minutos para tentar novamente.');
-        }
-      }
-      senhaClienteInput.value = '';
-      senhaClienteInput.focus();
-    };
+  function nextChannel() {
+    if (++currentIndex >= allChannels.length) currentIndex = 0;
+    playChannel(allChannels[currentIndex].streamUrl);
+  }
 
-    // Botão "Usar lista salva" pede senha 0000 para liberar
-    usarListaBtn.onclick = () => {
-      const senha = prompt('Digite a senha para usar lista salva:');
-      if (senha === savedListPassword) {
-        alert('Lista salva liberada! (Essa funcionalidade pode ser implementada)');
-        // Aqui você pode implementar a lógica para usar lista salva do sistema.
-        // No momento, só alerta.
-      } else {
-        alert('Senha incorreta para lista salva.');
-      }
-    };
+  function previousChannel() {
+    if (--currentIndex < 0) currentIndex = allChannels.length - 1;
+    playChannel(allChannels[currentIndex].streamUrl);
+  }
 
-    // Ao carregar a página, verifica se existe senha cliente salva
-    window.onload = () => {
-      const savedPwd = checkSavedClientPassword();
-      if (savedPwd) {
-        showMainUI();
-      } else {
-        senhaClienteInput.focus();
-      }
-    };
+  video.onclick = () => {
+    playerControls.classList.add('show');
+    clearTimeout(video.hideCtr);
+    video.hideCtr = setTimeout(() => playerControls.classList.remove('show'), 3000);
+  };
+  video.ondblclick = () => {
+    document.fullscreenElement ? document.exitFullscreen() : video.requestFullscreen();
+  };
 
-  </script>
+  function exitFullscreen() {
+    container.style.display = 'none';
+    senhaClienteSection.style.display = 'flex';
+    localStorage.removeItem('clientPassword');
+  }
+
+  searchInput.oninput = () => renderChannelList(allChannels);
+</script>
 </body>
-
 </html>
