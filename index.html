@@ -64,10 +64,12 @@
     }
     .video-container {
       position: relative; background: black; display: none;
+      width: 100%; height: 100vh; /* ocupa toda altura disponível */
     }
     .video-container.active { display: block; }
     video {
-      width: 100%; height: auto; max-height: 60vh;
+      width: 100%; height: 100vh; object-fit: contain;
+      background: black;
     }
     .player-controls {
       position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
@@ -222,15 +224,54 @@
   function activatePlayer(url) {
     if (window.hls) window.hls.destroy();
     videoContainer.classList.add('active');
+
     if (Hls.isSupported()) {
       window.hls = new Hls();
       hls.loadSource(url);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play();
+        openFullscreen(videoContainer);
+      });
     } else {
       video.src = url;
       video.play();
+      openFullscreen(videoContainer);
     }
+  }
+
+  // Função para entrar em fullscreen (compatível com vários navegadores)
+  function openFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { /* Firefox */
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari e Opera */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+      elem.msRequestFullscreen();
+    }
+  }
+
+  // Função para sair do fullscreen
+  function closeFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { /* Firefox */
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { /* Chrome, Safari e Opera */
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { /* IE/Edge */
+      document.msExitFullscreen();
+    }
+  }
+
+  // Botão Menu sai do fullscreen e volta para tela de senha
+  function exitFullscreen() {
+    closeFullscreen();
+    container.style.display = 'none';
+    senhaSection.style.display = 'flex';
+    localStorage.removeItem('cpwd');
   }
 
   function nextChannel() {
@@ -245,13 +286,8 @@
     activatePlayer(allChannels[currentIndex].streamUrl);
   }
 
-  function exitFullscreen() {
-    container.style.display = 'none';
-    senhaSection.style.display = 'flex';
-    localStorage.removeItem('cpwd');
-  }
-
   searchInput.oninput = () => render(allChannels);
+
 </script>
 </body>
 </html>
