@@ -64,12 +64,11 @@
     }
     .video-container {
       position: relative; background: black; display: none;
-      width: 100%; height: 100vh; /* ocupa toda altura disponível */
+      width: 100%; height: 100vh;
     }
     .video-container.active { display: block; }
-    video {
-      width: 100%; height: 100vh; object-fit: contain;
-      background: black;
+    #video {
+      width: 100%; height: 100vh;
     }
     .player-controls {
       position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
@@ -105,7 +104,7 @@
     </div>
     <div class="main">
       <div class="video-container" id="videoContainer">
-        <video id="video" controls autoplay></video>
+        <div id="video"></div>
         <div class="player-controls" id="pc">
           <button onclick="previousChannel()">⏮️ Voltar</button>
           <button onclick="nextChannel()">⏭️ Próximo</button>
@@ -130,8 +129,6 @@
   const vipBtn = document.getElementById('vipBtn');
   const searchInput = document.getElementById('searchInput');
   const channelList = document.getElementById('channelList');
-  const video = document.getElementById('video');
-  const pc = document.getElementById('pc');
   const videoContainer = document.getElementById('videoContainer');
 
   let allChannels = [], currentIndex = 0;
@@ -222,51 +219,51 @@
   }
 
   function activatePlayer(url) {
-    if (window.hls) window.hls.destroy();
     videoContainer.classList.add('active');
+    openFullscreen(videoContainer);
 
-    if (Hls.isSupported()) {
-      window.hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play();
-        openFullscreen(videoContainer);
-      });
-    } else {
-      video.src = url;
-      video.play();
-      openFullscreen(videoContainer);
+    // Destroi player anterior
+    if (window.player && typeof window.player.destroy === 'function') {
+      window.player.destroy();
     }
+
+    // Cria novo player Clappr
+    window.player = new Clappr.Player({
+      source: url,
+      parentId: '#video',
+      autoPlay: true,
+      width: '100%',
+      height: '100%',
+      mute: false,
+      fullscreenEnabled: true,
+      controls: true
+    });
   }
 
-  // Função para entrar em fullscreen (compatível com vários navegadores)
   function openFullscreen(elem) {
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) { /* Firefox */
+    } else if (elem.mozRequestFullScreen) {
       elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari e Opera */
+    } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    } else if (elem.msRequestFullscreen) {
       elem.msRequestFullscreen();
     }
   }
 
-  // Função para sair do fullscreen
   function closeFullscreen() {
     if (document.exitFullscreen) {
       document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) { /* Firefox */
+    } else if (document.mozCancelFullScreen) {
       document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) { /* Chrome, Safari e Opera */
+    } else if (document.webkitExitFullscreen) {
       document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { /* IE/Edge */
+    } else if (document.msExitFullscreen) {
       document.msExitFullscreen();
     }
   }
 
-  // Botão Menu sai do fullscreen e volta para tela de senha
   function exitFullscreen() {
     closeFullscreen();
     container.style.display = 'none';
@@ -287,7 +284,6 @@
   }
 
   searchInput.oninput = () => render(allChannels);
-
 </script>
 </body>
 </html>
