@@ -134,7 +134,7 @@
   const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
 
   const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal1.m3u',
+    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
     '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
     '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
     '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
@@ -170,7 +170,7 @@
   const exitBtn = document.getElementById('exitBtn');
 
   // Adicionar barra de filtros dinâmica para categorias
-  const categories = ['Favoritos'];
+  const categories = ['Todos', 'Favoritos'];
   const sidebar = document.querySelector('.sidebar');
   const filterContainer = document.createElement('div');
   filterContainer.style.display = 'flex';
@@ -181,8 +181,8 @@
   function applyCategoryFilter(cat) {
     if(cat === 'Favoritos'){
       renderChannels('', true);
-    } else {
-      renderChannels(cat);
+    } else if(cat === 'Todos'){
+      renderChannels('');
     }
   }
 
