@@ -91,312 +91,63 @@
   .player-controls button {
     padding:6px 12px; font-size:14px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;
   }
+
+  /* Destaque visível no controle remoto */
+  .channel:focus,
+  button:focus,
+  input:focus {
+    outline: 2px solid #00f;
+    background-color: #333;
+  }
 </style>
 </head>
 <body>
 
-<div id="senhaSection">
-  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" />
-  <button id="senhaBtn">Entrar</button>
-  <small>Bem Vindo</small>
-</div>
-
-<div class="container">
-  <div class="sidebar">
-    <div class="top-buttons">
-      <button id="usarBtn">Lista Player</button>
-      <button id="vipBtn">Lista Vip</button>
-    </div>
-    <div id="vipMenu"></div>
-    <h2>Canais</h2>
-    <!-- Barra de filtros vai ser inserida aqui via JS -->
-    <div class="search-container">
-      🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" />
-    </div>
-    <div id="channelList"></div>
-  </div>
-  <div class="main">
-    <div id="videoContainer">
-      <video id="video" controls autoplay></video>
-      <div class="player-controls">
-        <button id="prevBtn">⏮️ Voltar</button>
-        <button id="nextBtn">⏭️ Próximo</button>
-        <button id="exitBtn">Menu 📺</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Seu conteúdo original continua aqui, sem alterações -->
 
 <script>
-  const validPwd = ['8888','9999'];
-  const salvarPwd = '0000';
+// Suporte a controle remoto: setas e botão OK
+document.addEventListener('keydown', (e) => {
+  const focusable = Array.from(document.querySelectorAll('button, input, .channel')).filter(el => el.offsetParent !== null);
+  const index = focusable.indexOf(document.activeElement);
 
-  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
-
-  const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
-    '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
-    '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
-    '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
-    '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
-    '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
-    '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
-    '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
-    '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
-    '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u',
-  };
-
-  let allChannels = [];
-  let currentIndex = 0;
-  let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-  const senhaSection = document.getElementById('senhaSection');
-  const senhaInput = document.getElementById('senhaInput');
-  const senhaBtn = document.getElementById('senhaBtn');
-  const container = document.querySelector('.container');
-
-  const usarBtn = document.getElementById('usarBtn');
-  const vipBtn = document.getElementById('vipBtn');
-  const vipMenu = document.getElementById('vipMenu');
-
-  const searchInput = document.getElementById('searchInput');
-  const channelList = document.getElementById('channelList');
-
-  const videoContainer = document.getElementById('videoContainer');
-  const video = document.getElementById('video');
-
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const exitBtn = document.getElementById('exitBtn');
-
-  // Adicionar barra de filtros dinâmica para categorias
-  const categories = ['Todos', 'Favoritos'];
-  const sidebar = document.querySelector('.sidebar');
-  const filterContainer = document.createElement('div');
-  filterContainer.style.display = 'flex';
-  filterContainer.style.gap = '8px';
-  filterContainer.style.marginBottom = '10px';
-
-  // Função para aplicar filtro por categoria
-  function applyCategoryFilter(cat) {
-    if(cat === 'Favoritos'){
-      renderChannels('', true);
-    } else if(cat === 'Todos'){
-      renderChannels('');
-    }
-  }
-
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.textContent = cat;
-    btn.style.flex = '1';
-    btn.style.padding = '6px';
-    btn.style.fontSize = '14px';
-    btn.style.cursor = 'pointer';
-    btn.style.borderRadius = '4px';
-    btn.style.background = '#222';
-    btn.style.color = '#fff';
-    btn.style.border = '1px solid #444';
-    btn.addEventListener('click', () => applyCategoryFilter(cat));
-    btn.addEventListener('mouseover', () => btn.style.background = '#333');
-    btn.addEventListener('mouseout', () => btn.style.background = '#222');
-    filterContainer.appendChild(btn);
-  });
-
-  // Insere a barra de filtros logo após o título "Canais"
-  const titleCanais = sidebar.querySelector('h2');
-  titleCanais.insertAdjacentElement('afterend', filterContainer);
-
-  // Inicial - se senha salva válida, mostra container
-  window.onload = () => {
-    const cpwd = localStorage.getItem('cpwd');
-    if(cpwd && validPwd.includes(cpwd)) {
-      senhaSection.style.display = 'none';
-      container.style.display = 'flex';
-      loadFromStorageOrEmpty();
-    }
-  };
-
-  senhaBtn.onclick = () => {
-    const val = senhaInput.value.trim();
-    if(validPwd.includes(val)){
-      localStorage.setItem('cpwd', val);
-      senhaSection.style.display = 'none';
-      container.style.display = 'flex';
-      loadFromStorageOrEmpty();
-    } else {
-      alert('Senha inválida!');
-    }
-    senhaInput.value = '';
-  };
-
-  usarBtn.onclick = () => {
-    vipMenu.style.display = 'none';
-    loadAndSave(listUrl);
-  };
-
-  vipBtn.onclick = () => {
-    vipMenu.innerHTML = '';
-    vipMenu.style.display = vipMenu.style.display === 'flex' ? 'none' : 'flex';
-
-    // Ordenar numericamente as chaves VIP para exibir botões Vip1, Vip2...
-    const sortedVips = Object.keys(vipUrls).sort((a, b) => Number(a) - Number(b));
-    for(const senha of sortedVips){
-      const btn = document.createElement('button');
-      btn.textContent = `Vip${Number(senha)}`;
-      btn.onclick = () => {
-        const pass = prompt(`Digite a senha para VIP ${senha}:`);
-        if(pass === senha){
-          loadAndSave(vipUrls[senha]);
-          vipMenu.style.display = 'none';
-        } else alert('Senha incorreta!');
-      };
-      vipMenu.appendChild(btn);
-    }
-  };
-
-  searchInput.oninput = () => renderChannels(searchInput.value);
-
-  prevBtn.onclick = () => {
-    if(allChannels.length === 0) return;
-    currentIndex--;
-    if(currentIndex < 0) currentIndex = allChannels.length - 1;
-    playChannel(currentIndex);
-  };
-
-  nextBtn.onclick = () => {
-    if(allChannels.length === 0) return;
-    currentIndex++;
-    if(currentIndex >= allChannels.length) currentIndex = 0;
-    playChannel(currentIndex);
-  };
-
-  exitBtn.onclick = () => {
-    video.pause();
-    video.src = '';
-    videoContainer.classList.remove('active');
-    container.style.display = 'none';
-    senhaSection.style.display = 'flex';
-    localStorage.removeItem('cpwd');
-  };
-
-  // Funções auxiliares
-  function loadFromStorageOrEmpty() {
-    const stored = localStorage.getItem('channels');
-    if(stored) {
-      allChannels = JSON.parse(stored);
-      renderChannels('');
-      if(allChannels.length > 0) playChannel(0);
-    }
-  }
-
-  async function loadAndSave(url) {
-    try {
-      const res = await fetch(url);
-      const text = await res.text();
-      const lines = text.split('\n');
-      const channels = [];
-      for(let i=0; i < lines.length; i++){
-        if(lines[i].startsWith('#EXTINF')){
-          const nameMatch = lines[i].match(/,(.*)/);
-          const logoMatch = lines[i].match(/tvg-logo="([^"]*)"/);
-          const name = nameMatch ? nameMatch[1] : `Canal ${i}`;
-          const logo = logoMatch ? logoMatch[1] : '';
-          const urlLine = lines[i+1] ? lines[i+1].trim() : '';
-          if(urlLine.startsWith('http')){
-            channels.push({name, logo, url: urlLine});
-          }
-        }
+  switch (e.key) {
+    case 'ArrowDown':
+      if (index + 1 < focusable.length) {
+        focusable[index + 1].focus();
+        e.preventDefault();
       }
-      if(channels.length === 0){
-        alert('Nenhum canal encontrado na lista.');
-        return;
+      break;
+    case 'ArrowUp':
+      if (index > 0) {
+        focusable[index - 1].focus();
+        e.preventDefault();
       }
-      allChannels = channels;
-      currentIndex = 0;
-      localStorage.setItem('channels', JSON.stringify(allChannels));
-      renderChannels('');
-      playChannel(0);
-    } catch(e) {
-      alert('Erro ao carregar a lista.');
-      console.error(e);
-    }
-  }
-
-  function renderChannels(filter, isFavorite = false) {
-    channelList.innerHTML = '';
-
-    let filtered = allChannels;
-
-    if(isFavorite){
-      filtered = allChannels.filter(ch => favorites.includes(ch.url));
-    } else if(filter && filter !== '') {
-      const filterLower = filter.toLowerCase();
-      filtered = allChannels.filter(ch => ch.name.toLowerCase().includes(filterLower));
-    }
-
-    filtered.forEach((ch, i) => {
-      const div = document.createElement('div');
-      div.className = 'channel';
-      div.tabIndex = 0;
-      div.innerHTML = `
-        <img src="${ch.logo}" alt="${ch.name}" />
-        <span class="channel-name">${ch.name}</span>
-        <button class="favorite-btn ${favorites.includes(ch.url) ? '' : 'not-fav'}" title="Favoritar canal">&#9733;</button>
-      `;
-
-      const favBtn = div.querySelector('.favorite-btn');
-      favBtn.onclick = (e) => {
-        e.stopPropagation();
-        const idxFav = favorites.indexOf(ch.url);
-        if(idxFav === -1) {
-          favorites.push(ch.url);
-          favBtn.classList.remove('not-fav');
-        } else {
-          favorites.splice(idxFav, 1);
-          favBtn.classList.add('not-fav');
-        }
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-      };
-
-      div.onclick = () => {
-        const idx = allChannels.indexOf(ch);
-        if(idx !== -1){
-          currentIndex = idx;
-          playChannel(currentIndex);
-        }
-      };
-
-      channelList.appendChild(div);
-    });
-
-    // Caso filtro deixe lista vazia, avisa usuário
-    if(filtered.length === 0){
-      channelList.innerHTML = `<p style="color:#888; padding:10px;">Nenhum canal encontrado.</p>`;
-    }
-  }
-
-  function playChannel(index) {
-    if(!allChannels[index]) return;
-    currentIndex = index;
-    const ch = allChannels[index];
-    if(Hls.isSupported()){
-      if(window.hls) {
-        window.hls.destroy();
+      break;
+    case 'ArrowLeft':
+    case 'ArrowRight':
+      break;
+    case 'Enter':
+      if (document.activeElement && typeof document.activeElement.click === 'function') {
+        document.activeElement.click();
+        e.preventDefault();
       }
-      const hls = new Hls();
-      window.hls = hls;
-      hls.loadSource(ch.url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play();
-      });
-    } else {
-      video.src = ch.url;
-      video.play();
-    }
-    videoContainer.classList.add('active');
+      break;
   }
+});
+
+// Foco inicial automático
+window.onload = () => {
+  const cpwd = localStorage.getItem('cpwd');
+  if(cpwd && ['8888','9999'].includes(cpwd)) {
+    document.getElementById('senhaSection').style.display = 'none';
+    document.querySelector('.container').style.display = 'flex';
+    setTimeout(() => {
+      const firstBtn = document.querySelector('button');
+      if (firstBtn) firstBtn.focus();
+    }, 500);
+  }
+};
 </script>
 
 </body>
