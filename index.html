@@ -17,7 +17,7 @@
     }
     small { color:#888; }
     .container {
-      display:none; height:100vh; width:100vw; overflow:hidden;
+      display:none; height:100vh; width:100vw; overflow:hidden; display:flex;
     }
     .sidebar {
       background:#111; width:300px; padding:10px; box-sizing:border-box; display:flex; flex-direction:column;
@@ -96,7 +96,7 @@
 <body>
 
 <div id="senhaSection" role="dialog" aria-modal="true" aria-label="Tela de senha">
-  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="new-password" aria-label="Campo de senha"/>
+  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" aria-label="Campo de senha"/>
   <button id="senhaBtn" aria-label="Botão entrar">Entrar</button>
   <small>Bem Vindo</small>
 </div>
@@ -108,6 +108,13 @@
       <button id="vipBtn" aria-label="Lista VIP">Lista Vip</button>
     </div>
     <div id="vipMenu" aria-label="Menu VIP"></div>
+
+    <!-- Botões de filtro -->
+    <div id="filterContainer" style="display:flex; gap:8px; margin-bottom:10px;">
+      <button id="btnTodos" style="flex:1; padding:6px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; color:#fff; border:1px solid #444;">Todos</button>
+      <button id="btnFavoritos" style="flex:1; padding:6px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; color:#fff; border:1px solid #444;">Favoritos</button>
+    </div>
+
     <h2>Canais</h2>
     <div class="search-container">
       🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" aria-label="Pesquisar canal"/>
@@ -127,302 +134,228 @@
 </div>
 
 <script>
-  console.clear();
-  console.log("IPTV Player iniciado");
+const validPwd = ['8888','9999'];
+const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
 
-  const validPwd = ['8888', '9999'];
-  const salvarPwd = '0000';
+const vipUrls = {
+  '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
+  '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
+  '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
+  '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
+  '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
+  '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
+  '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
+  '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
+  '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
+  '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u'
+};
 
-  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
+let allChannels = [];
+let currentIndex = 0;
+let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-  const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
-    '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
-    '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
-    '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
-    '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
-    '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
-    '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
-    '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
-    '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
-    '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u',
-  };
+const senhaSection = document.getElementById('senhaSection');
+const senhaInput = document.getElementById('senhaInput');
+const senhaBtn = document.getElementById('senhaBtn');
+const container = document.querySelector('.container');
 
-  let allChannels = [];
-  let currentIndex = 0;
-  let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+const usarBtn = document.getElementById('usarBtn');
+const vipBtn = document.getElementById('vipBtn');
+const vipMenu = document.getElementById('vipMenu');
 
-  const senhaSection = document.getElementById('senhaSection');
-  const senhaInput = document.getElementById('senhaInput');
-  const senhaBtn = document.getElementById('senhaBtn');
-  const container = document.querySelector('.container');
+const btnTodos = document.getElementById('btnTodos');
+const btnFavoritos = document.getElementById('btnFavoritos');
+const searchInput = document.getElementById('searchInput');
+const channelList = document.getElementById('channelList');
 
-  const usarBtn = document.getElementById('usarBtn');
-  const vipBtn = document.getElementById('vipBtn');
-  const vipMenu = document.getElementById('vipMenu');
+const videoContainer = document.getElementById('videoContainer');
+const video = document.getElementById('video');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const exitBtn = document.getElementById('exitBtn');
 
-  const searchInput = document.getElementById('searchInput');
-  const channelList = document.getElementById('channelList');
+// Filtro por categoria
+btnTodos.onclick = () => renderChannelList(allChannels);
+btnFavoritos.onclick = () => renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
 
-  const videoContainer = document.getElementById('videoContainer');
-  const video = document.getElementById('video');
+function saveFavorites() {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+}
 
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const exitBtn = document.getElementById('exitBtn');
-
-  const categories = ['Todos', 'Favoritos'];
-  const sidebar = document.querySelector('.sidebar');
-  const filterContainer = document.createElement('div');
-  filterContainer.style.display = 'flex';
-  filterContainer.style.gap = '8px';
-  filterContainer.style.marginBottom = '10px';
-
-  function applyFilter(category) {
-    if (category === 'Favoritos') {
-      renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
-    } else {
-      renderChannelList(allChannels);
-    }
+function renderChannelList(channels) {
+  channelList.innerHTML = '';
+  if (channels.length === 0) {
+    channelList.innerHTML = '<p>Nenhum canal encontrado.</p>';
+    return;
   }
+  channels.forEach((channel, index) => {
+    const div = document.createElement('div');
+    div.className = 'channel';
+    div.tabIndex = 0;
+    div.dataset.index = index;
 
-  function createFilterButtons() {
-    categories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.textContent = cat;
-      btn.style.flex = '1';
-      btn.style.padding = '6px';
-      btn.style.fontSize = '14px';
-      btn.style.cursor = 'pointer';
-      btn.style.borderRadius = '4px';
-      btn.style.background = '#222';
-      btn.style.color = '#fff';
-      btn.style.border = '1px solid #444';
-      btn.addEventListener('click', () => applyFilter(cat));
-      filterContainer.appendChild(btn);
+    const img = document.createElement('img');
+    img.src = channel.tvg_logo || 'https://via.placeholder.com/50?text=No+Logo';
+    img.alt = channel.tvg_name;
+    div.appendChild(img);
+
+    const span = document.createElement('span');
+    span.className = 'channel-name';
+    span.textContent = channel.tvg_name;
+    div.appendChild(span);
+
+    const favBtn = document.createElement('button');
+    favBtn.className = 'favorite-btn';
+    favBtn.innerHTML = favorites.includes(channel.tvg_name) ? '★' : '☆';
+    if (!favorites.includes(channel.tvg_name)) favBtn.classList.add('not-fav');
+    favBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(channel.tvg_name, favBtn);
     });
-    sidebar.insertBefore(filterContainer, sidebar.firstChild);
-  }
+    div.appendChild(favBtn);
 
-  createFilterButtons();
-
-  function saveFavorites() {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }
-
-  async function loadChannels(url) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Falha ao carregar lista');
-      const text = await res.text();
-      return parseM3U(text);
-    } catch (e) {
-      console.error('Erro ao carregar canais:', e);
-      alert('Erro ao carregar canais');
-      return [];
-    }
-  }
-
-  function parseM3U(data) {
-    const lines = data.split('\n');
-    const channels = [];
-    let channel = null;
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i].trim();
-      if (line.startsWith('#EXTINF:')) {
-        const tvg_name = (line.match(/tvg-name="([^"]+)"/) || [null, 'Canal'])[1];
-        const tvg_logo = (line.match(/tvg-logo="([^"]+)"/) || [null, ''])[1];
-        const group_title = (line.match(/group-title="([^"]+)"/) || [null, ''])[1];
-        channel = { tvg_name, tvg_logo, group_title, url: '' };
-      } else if (line && channel) {
-        channel.url = line;
-        channels.push(channel);
-        channel = null;
-      }
-    }
-    console.log(`Canais carregados: ${channels.length}`);
-    return channels;
-  }
-
-  function renderChannelList(channels) {
-    channelList.innerHTML = '';
-    if (channels.length === 0) {
-      channelList.innerHTML = '<p>Nenhum canal encontrado.</p>';
-      return;
-    }
-    channels.forEach((channel, index) => {
-      const div = document.createElement('div');
-      div.className = 'channel';
-      div.tabIndex = 0;
-      div.setAttribute('role', 'button');
-      div.setAttribute('aria-label', `Canal ${channel.tvg_name}`);
-      div.dataset.index = index;
-
-      const img = document.createElement('img');
-      img.src = channel.tvg_logo || 'https://via.placeholder.com/50?text=No+Logo';
-      img.alt = channel.tvg_name;
-      div.appendChild(img);
-
-      const span = document.createElement('span');
-      span.className = 'channel-name';
-      span.textContent = channel.tvg_name;
-      div.appendChild(span);
-
-      const favBtn = document.createElement('button');
-      favBtn.className = 'favorite-btn';
-      favBtn.innerHTML = favorites.includes(channel.tvg_name) ? '★' : '☆';
-      if (!favorites.includes(channel.tvg_name)) favBtn.classList.add('not-fav');
-      favBtn.title = favorites.includes(channel.tvg_name) ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
-      favBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleFavorite(channel.tvg_name, favBtn);
-      });
-      div.appendChild(favBtn);
-
-      div.addEventListener('click', () => {
-        playChannel(channel);
-        currentIndex = index;
-      });
-
-      div.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          playChannel(channel);
-          currentIndex = index;
-        }
-      });
-
-      channelList.appendChild(div);
+    div.addEventListener('click', () => {
+      playChannel(channel);
+      currentIndex = index;
     });
-  }
 
-  function toggleFavorite(name, btn) {
-    if (favorites.includes(name)) {
-      favorites = favorites.filter(f => f !== name);
-      btn.innerHTML = '☆';
-      btn.classList.add('not-fav');
-      btn.title = 'Adicionar aos favoritos';
-    } else {
-      favorites.push(name);
-      btn.innerHTML = '★';
-      btn.classList.remove('not-fav');
-      btn.title = 'Remover dos favoritos';
-    }
-    saveFavorites();
-  }
-
-  function playChannel(channel) {
-    if (!channel || !channel.url) return;
-    console.log('Tocando canal:', channel.tvg_name, channel.url);
-    container.setAttribute('aria-hidden', 'true');
-    videoContainer.classList.add('active');
-
-    if (window.hls) {
-      window.hls.destroy();
-    }
-
-    if (Hls.isSupported()) {
-      window.hls = new Hls();
-      window.hls.loadSource(channel.url);
-      window.hls.attachMedia(video);
-      window.hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('Erro HLS:', data);
-      });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = channel.url;
-    } else {
-      alert('Seu navegador não suporta reprodução deste formato.');
-    }
-    video.play();
-  }
-
-  function nextChannel() {
-    currentIndex = (currentIndex + 1) % allChannels.length;
-    playChannel(allChannels[currentIndex]);
-  }
-
-  function prevChannel() {
-    currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
-    playChannel(allChannels[currentIndex]);
-  }
-
-  function exitPlayer() {
-    if (window.hls) {
-      window.hls.destroy();
-      window.hls = null;
-    }
-    video.pause();
-    video.src = '';
-    videoContainer.classList.remove('active');
-    container.setAttribute('aria-hidden', 'false');
-    searchInput.focus();
-  }
-
-  function filterChannels() {
-    const q = searchInput.value.toLowerCase();
-    if (q === '') {
-      renderChannelList(allChannels);
-      return;
-    }
-    const filtered = allChannels.filter(c => c.tvg_name?.toLowerCase().includes(q));
-    renderChannelList(filtered);
-  }
-
-  senhaBtn.onclick = () => {
-    const val = senhaInput.value.trim();
-    console.log('Senha digitada:', val);
-    if (validPwd.includes(val)) {
-      senhaSection.style.display = 'none';
-      container.style.display = 'flex';
-      container.setAttribute('aria-hidden', 'false');
-      loadChannels(listUrl).then(channels => {
-        allChannels = channels;
-        renderChannelList(allChannels);
-      });
-      senhaInput.value = '';
-    } else {
-      alert('Senha inválida!');
-    }
-  };
-
-  senhaInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') senhaBtn.click();
+    channelList.appendChild(div);
   });
+}
 
-  usarBtn.onclick = () => {
+function toggleFavorite(name, btn) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(f => f !== name);
+    btn.innerHTML = '☆';
+    btn.classList.add('not-fav');
+  } else {
+    favorites.push(name);
+    btn.innerHTML = '★';
+    btn.classList.remove('not-fav');
+  }
+  saveFavorites();
+}
+
+function playChannel(channel) {
+  if (!channel || !channel.url) return;
+  videoContainer.classList.add('active');
+  container.setAttribute('aria-hidden', 'true');
+
+  if (Hls.isSupported()) {
+    if (window.hls) window.hls.destroy();
+    window.hls = new Hls();
+    window.hls.loadSource(channel.url);
+    window.hls.attachMedia(video);
+  } else {
+    video.src = channel.url;
+  }
+  video.play();
+}
+
+prevBtn.onclick = () => {
+  currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+nextBtn.onclick = () => {
+  currentIndex = (currentIndex + 1) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+exitBtn.onclick = () => {
+  video.pause();
+  video.src = '';
+  videoContainer.classList.remove('active');
+  container.setAttribute('aria-hidden', 'false');
+};
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase();
+  renderChannelList(allChannels.filter(c => c.tvg_name.toLowerCase().includes(q)));
+});
+
+senhaBtn.onclick = () => {
+  const val = senhaInput.value.trim();
+  if (validPwd.includes(val)) {
+    senhaSection.style.display = 'none';
+    container.style.display = 'flex';
     loadChannels(listUrl).then(channels => {
       allChannels = channels;
       renderChannelList(allChannels);
-      vipMenu.style.display = 'none';
     });
-  };
+  } else {
+    alert('Senha inválida!');
+  }
+};
 
-  vipBtn.onclick = () => {
-    vipMenu.innerHTML = '';
+senhaInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') senhaBtn.click();
+});
+
+usarBtn.onclick = () => {
+  loadChannels(listUrl).then(channels => {
+    allChannels = channels;
+    renderChannelList(allChannels);
+    vipMenu.style.display = 'none';
+  });
+};
+
+let vipVisible = false;
+vipBtn.onclick = () => {
+  vipVisible = !vipVisible;
+  vipMenu.innerHTML = '';
+  vipMenu.style.display = vipVisible ? 'flex' : 'none';
+  if (vipVisible) {
     for (const [key, url] of Object.entries(vipUrls)) {
       const b = document.createElement('button');
       b.textContent = `VIP ${key}`;
-      b.setAttribute('aria-label', `Carregar lista VIP ${key}`);
       b.addEventListener('click', () => {
-        loadChannels(url).then(channels => {
-          allChannels = channels;
-          renderChannelList(allChannels);
-          vipMenu.style.display = 'flex';
-        });
+        const senha = prompt(`Digite a senha para acessar VIP ${key}:`);
+        if (senha === key) {
+          loadChannels(url).then(channels => {
+            allChannels = channels;
+            renderChannelList(allChannels);
+          });
+        } else {
+          alert('Senha incorreta!');
+        }
       });
       vipMenu.appendChild(b);
     }
-    vipMenu.style.display = 'flex';
-  };
+  }
+};
 
-  searchInput.addEventListener('input', filterChannels);
+async function loadChannels(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
+    const text = await res.text();
+    return parseM3U(text);
+  } catch (e) {
+    alert('Erro ao carregar canais!');
+    return [];
+  }
+}
 
-  prevBtn.onclick = prevChannel;
-  nextBtn.onclick = nextChannel;
-  exitBtn.onclick = exitPlayer;
+function parseM3U(data) {
+  const lines = data.split('\n');
+  const channels = [];
+  let channel = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('#EXTINF:')) {
+      const tvg_name = (line.match(/tvg-name="([^"]+)"/) || [null, 'Canal'])[1];
+      const tvg_logo = (line.match(/tvg-logo="([^"]+)"/) || [null, ''])[1];
+      const group_title = (line.match(/group-title="([^"]+)"/) || [null, ''])[1];
+      channel = { tvg_name, tvg_logo, group_title, url: '' };
+    } else if (line && channel) {
+      channel.url = line;
+      channels.push(channel);
+      channel = null;
+    }
+  }
+  return channels;
+}
 
-  window.onload = () => {
-    senhaInput.focus();
-  };
+window.onload = () => senhaInput.focus();
 </script>
 
 </body>
