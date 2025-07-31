@@ -2,12 +2,18 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<title>IPTV Player - Pluto TV Style</title>
+<title>IPTV Player - Controle Remoto Corrigido</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
-  body, html { margin:0; padding:0; background:#000; color:#fff; font-family:sans-serif; height:100vh; }
+  body, html {
+    margin:0; padding:0; background:#000; color:#fff; font-family:sans-serif; height:100vh; overflow:hidden;
+  }
   #senhaSection {
-    height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:#000;
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;
+    z-index: 1000;
   }
   #senhaInput {
     padding:8px; font-size:16px; width:220px; border-radius:5px; border:none; text-align:center; background:#222; color:#fff;
@@ -16,11 +22,12 @@
     padding:10px 20px; font-size:16px; cursor:pointer; background:#1c1c1c; border:1px solid #444; color:#fff; border-radius:5px;
   }
   small { color:#888; }
+
   .container {
-    display:none; height:100vh; width:100vw; overflow:hidden; display:flex;
+    height:100vh; width:100vw; display:flex; background:#000;
   }
   .sidebar {
-    background:#111; width:300px; padding:10px; box-sizing:border-box; display:flex; flex-direction:column;
+    background:#111; width:320px; padding:10px; box-sizing:border-box; display:flex; flex-direction:column;
   }
   .top-buttons {
     display:flex; gap:10px; margin-bottom:10px;
@@ -28,8 +35,9 @@
   .top-buttons button {
     flex:1; padding:8px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; border:1px solid #444; color:#fff;
   }
-  .top-buttons button:hover {
+  .top-buttons button:hover, .top-buttons button:focus {
     background:#333;
+    outline:none;
   }
   #vipMenu {
     display:none; flex-direction:column; gap:5px; margin-bottom:10px;
@@ -37,7 +45,7 @@
   #vipMenu button {
     background:#222; border:1px solid #444; padding:6px; border-radius:3px; cursor:pointer; color:#fff;
   }
-  #vipMenu button:hover { background:#333; }
+  #vipMenu button:hover, #vipMenu button:focus { background:#333; outline:none; }
   h2 {
     margin:0 0 10px 0;
   }
@@ -51,7 +59,7 @@
     color:#888;
   }
   #channelList {
-    overflow-y:auto; flex:1;
+    overflow-y:auto; flex:1; outline:none;
   }
   .channel {
     display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #222;
@@ -59,6 +67,10 @@
   .channel:hover, .channel:focus {
     background:#222;
     outline:none;
+  }
+  .channel:focus {
+    background:#444;
+    outline: 2px solid #fff;
   }
   .channel img {
     width:50px; height:50px; object-fit:contain; margin-right:10px;
@@ -73,7 +85,7 @@
     color:#555;
   }
   .main {
-    flex:1; position:relative; display:flex; flex-direction:column;
+    flex:1; position:relative; display:flex; flex-direction:column; background:#000;
   }
   #videoContainer {
     position:relative; background:black; width:100%; height:100vh; display:none;
@@ -91,17 +103,22 @@
   .player-controls button {
     padding:6px 12px; font-size:14px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;
   }
+  .hidden {
+    display:none !important;
+  }
 </style>
 </head>
 <body>
 
+<!-- TELA DE SENHA, só aparece inicialmente -->
 <div id="senhaSection" role="dialog" aria-modal="true" aria-label="Tela de senha">
   <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" aria-label="Campo de senha"/>
   <button id="senhaBtn" aria-label="Botão entrar">Entrar</button>
   <small>Bem Vindo</small>
 </div>
 
-<div class="container" role="main" aria-hidden="true">
+<!-- CONTAINER PRINCIPAL, inicialmente escondido -->
+<div class="container hidden" role="main" aria-hidden="true" tabindex="0">
   <div class="sidebar" role="navigation" aria-label="Lista de canais e menus">
     <div class="top-buttons">
       <button id="usarBtn" aria-label="Lista Player">Lista Player</button>
@@ -131,22 +148,7 @@
   console.log("IPTV Player iniciado");
 
   const validPwd = ['8888','9999'];
-  const salvarPwd = '0000'; // senha VIP master para salvar (não usada diretamente aqui)
-
-  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8'; // LINK TESTE FUNCIONAL - substitua pelo seu
-
-  const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
-    '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
-    '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
-    '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
-    '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
-    '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
-    '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
-    '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
-    '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
-    '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u',
-  };
+  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8'; // Link teste, substitua pelo seu real
 
   let allChannels = [];
   let currentIndex = 0;
@@ -171,65 +173,7 @@
   const nextBtn = document.getElementById('nextBtn');
   const exitBtn = document.getElementById('exitBtn');
 
-  // Adicionar barra de filtros dinâmica para categorias
-  const categories = ['Todos', 'Favoritos'];
-  const sidebar = document.querySelector('.sidebar');
-  const filterContainer = document.createElement('div');
-  filterContainer.style.display = 'flex';
-  filterContainer.style.gap = '8px';
-  filterContainer.style.marginBottom = '10px';
-
-  // Função para aplicar filtro por categoria
-  function applyFilter(category) {
-    if(category === 'Favoritos') {
-      renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
-    } else {
-      renderChannelList(allChannels);
-    }
-  }
-
-  function createFilterButtons() {
-    categories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.textContent = cat;
-      btn.style.flex = '1';
-      btn.style.padding = '6px';
-      btn.style.fontSize = '14px';
-      btn.style.cursor = 'pointer';
-      btn.style.borderRadius = '4px';
-      btn.style.background = '#222';
-      btn.style.color = '#fff';
-      btn.style.border = '1px solid #444';
-      btn.addEventListener('click', () => {
-        applyFilter(cat);
-      });
-      filterContainer.appendChild(btn);
-    });
-    sidebar.insertBefore(filterContainer, sidebar.firstChild);
-  }
-
-  createFilterButtons();
-
-  // Função para salvar favoritos
-  function saveFavorites() {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }
-
-  // Função para carregar canais do arquivo M3U (simples)
-  async function loadChannels(url) {
-    try {
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('Falha ao carregar lista');
-      const text = await res.text();
-      return parseM3U(text);
-    } catch(e) {
-      console.error('Erro ao carregar canais:', e);
-      alert('Erro ao carregar canais');
-      return [];
-    }
-  }
-
-  // Função simples para parsear M3U em objetos canal
+  // Função simples para parsear M3U
   function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
@@ -237,7 +181,6 @@
     for(let i=0; i<lines.length; i++) {
       let line = lines[i].trim();
       if(line.startsWith('#EXTINF:')) {
-        // EX: #EXTINF:-1 tvg-id="..." tvg-name="Channel" tvg-logo="..." group-title="..."
         const tvg_name = (line.match(/tvg-name="([^"]+)"/) || [null, 'Canal'])[1];
         const tvg_logo = (line.match(/tvg-logo="([^"]+)"/) || [null, ''])[1];
         const group_title = (line.match(/group-title="([^"]+)"/) || [null, ''])[1];
@@ -252,7 +195,20 @@
     return channels;
   }
 
-  // Renderizar lista de canais
+  async function loadChannels(url) {
+    try {
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Falha ao carregar lista');
+      const text = await res.text();
+      return parseM3U(text);
+    } catch(e) {
+      console.error('Erro ao carregar canais:', e);
+      alert('Erro ao carregar canais');
+      return [];
+    }
+  }
+
+  // Renderiza lista de canais e adiciona foco + navegação por teclado
   function renderChannelList(channels) {
     channelList.innerHTML = '';
     if(channels.length === 0) {
@@ -277,26 +233,39 @@
       span.textContent = channel.tvg_name;
       div.appendChild(span);
 
-      const favBtn = document.createElement('button');
-      favBtn.className = 'favorite-btn';
-      favBtn.innerHTML = favorites.includes(channel.tvg_name) ? '★' : '☆';
-      if(!favorites.includes(channel.tvg_name)) favBtn.classList.add('not-fav');
-      favBtn.title = favorites.includes(channel.tvg_name) ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
-      favBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleFavorite(channel.tvg_name, favBtn);
-      });
-      div.appendChild(favBtn);
-
       div.addEventListener('click', () => {
         playChannel(channel);
         currentIndex = index;
       });
 
-      div.addEventListener('keydown', (e) => {
+      div.addEventListener('keydown', e => {
         if(e.key === 'Enter' || e.key === ' ') {
           playChannel(channel);
           currentIndex = index;
+          e.preventDefault();
+        }
+        else if(e.key === 'ArrowDown') {
+          if(div.nextElementSibling) div.nextElementSibling.focus();
+          e.preventDefault();
+        }
+        else if(e.key === 'ArrowUp') {
+          if(div.previousElementSibling) div.previousElementSibling.focus();
+          else channelList.focus();
+          e.preventDefault();
+        }
+        else if(e.key === 'ArrowRight') {
+          // Sair para player se canal já estiver tocando e expandir video
+          if(videoContainer.classList.contains('active')) {
+            toggleFullscreen();
+          }
+          e.preventDefault();
+        }
+        else if(e.key === 'ArrowLeft') {
+          // Voltar foco para lista se estiver no player
+          if(videoContainer.classList.contains('active')) {
+            exitPlayer();
+          }
+          e.preventDefault();
         }
       });
 
@@ -304,34 +273,18 @@
     });
   }
 
-  function toggleFavorite(name, btn) {
-    if(favorites.includes(name)) {
-      favorites = favorites.filter(f => f !== name);
-      btn.innerHTML = '☆';
-      btn.classList.add('not-fav');
-      btn.title = 'Adicionar aos favoritos';
-    } else {
-      favorites.push(name);
-      btn.innerHTML = '★';
-      btn.classList.remove('not-fav');
-      btn.title = 'Remover dos favoritos';
-    }
-    saveFavorites();
-  }
-
-  // Tocar canal
+  // Play canal com HLS
   function playChannel(channel) {
     if(!channel || !channel.url) return;
     console.log('Tocando canal:', channel.tvg_name, channel.url);
-    container.setAttribute('aria-hidden', 'true');
     videoContainer.classList.add('active');
-    video.src = channel.url;
+    video.src = '';
+    if(window.hls) {
+      window.hls.destroy();
+      window.hls = null;
+    }
 
-    // Tentativa de usar HLS.js se necessário
     if(Hls.isSupported()) {
-      if(window.hls) {
-        window.hls.destroy();
-      }
       window.hls = new Hls();
       window.hls.loadSource(channel.url);
       window.hls.attachMedia(video);
@@ -346,26 +299,39 @@
     video.play();
   }
 
-  // Navegação canais
   function nextChannel() {
     currentIndex = (currentIndex + 1) % allChannels.length;
     playChannel(allChannels[currentIndex]);
+    focusChannel(currentIndex);
   }
   function prevChannel() {
     currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
     playChannel(allChannels[currentIndex]);
+    focusChannel(currentIndex);
   }
 
-  // Voltar ao menu
   function exitPlayer() {
     video.pause();
     video.src = '';
     videoContainer.classList.remove('active');
-    container.setAttribute('aria-hidden', 'false');
-    senhaInput.focus();
+    container.focus();
   }
 
-  // Filtrar canais pela busca
+  function toggleFullscreen() {
+    if(!document.fullscreenElement) {
+      videoContainer.requestFullscreen().catch(err => {
+        console.error(`Erro ao ativar fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  function focusChannel(index) {
+    const items = channelList.querySelectorAll('.channel');
+    if(items[index]) items[index].focus();
+  }
+
   function filterChannels() {
     const q = searchInput.value.toLowerCase();
     if(q === '') {
@@ -379,48 +345,55 @@
   // Eventos botão senha
   senhaBtn.onclick = () => {
     const val = senhaInput.value.trim();
-    console.log('Senha digitada:', val);
     if(validPwd.includes(val)) {
-      // Senha correta
       senhaSection.style.display = 'none';
-      container.style.display = 'flex';
+      container.classList.remove('hidden');
       container.setAttribute('aria-hidden', 'false');
+      senhaInput.value = '';
       loadChannels(listUrl).then(channels => {
         allChannels = channels;
         renderChannelList(allChannels);
+        // foco no primeiro canal após carregar lista
+        setTimeout(() => focusChannel(0), 100);
       });
-      senhaInput.value = '';
     } else {
       alert('Senha inválida!');
+      senhaInput.value = '';
+      senhaInput.focus();
     }
   };
 
-  // Atalho enter na senha
   senhaInput.addEventListener('keydown', e => {
     if(e.key === 'Enter') senhaBtn.click();
   });
 
   // Botões top
   usarBtn.onclick = () => {
-    console.log('Botão Lista Player clicado');
     loadChannels(listUrl).then(channels => {
       allChannels = channels;
       renderChannelList(allChannels);
       vipMenu.style.display = 'none';
+      focusChannel(0);
     });
   };
 
   vipBtn.onclick = () => {
-    console.log('Botão Lista VIP clicado');
     vipMenu.innerHTML = '';
+    // Exemplo: colocar urls VIP, adicione as suas aqui:
+    const vipUrls = {
+      VIP1: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      VIP2: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
+    };
     for(const [key, url] of Object.entries(vipUrls)) {
       const b = document.createElement('button');
       b.textContent = `VIP ${key}`;
+      b.tabIndex = 0;
       b.addEventListener('click', () => {
         loadChannels(url).then(channels => {
           allChannels = channels;
           renderChannelList(allChannels);
           vipMenu.style.display = 'flex';
+          focusChannel(0);
         });
       });
       vipMenu.appendChild(b);
@@ -430,15 +403,40 @@
 
   searchInput.addEventListener('input', filterChannels);
 
-  prevBtn.onclick = prevChannel;
-  nextBtn.onclick = nextChannel;
-  exitBtn.onclick = exitPlayer;
+  prevBtn.onclick = () => {
+    prevChannel();
+  };
+
+  nextBtn.onclick = () => {
+    nextChannel();
+  };
+
+  exitBtn.onclick = () => {
+    exitPlayer();
+  };
+
+  // Navegação teclado na lista de canais
+  channelList.addEventListener('keydown', e => {
+    if(e.target.classList.contains('channel')) {
+      if(e.key === 'ArrowDown') {
+        if(e.target.nextElementSibling) {
+          e.target.nextElementSibling.focus();
+          e.preventDefault();
+        }
+      }
+      else if(e.key === 'ArrowUp') {
+        if(e.target.previousElementSibling) {
+          e.target.previousElementSibling.focus();
+          e.preventDefault();
+        }
+      }
+    }
+  });
 
   // Foco inicial na senha
   window.onload = () => {
     senhaInput.focus();
   };
-
 </script>
 
 </body>
