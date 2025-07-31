@@ -1,5 +1,68 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+    <meta charset="UTF-8">
+  <title>Site em teste</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding-top: 20px; /* espaço maior para faixa centralizada */
+      background: #121212;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .scrolling-text {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-30%);
+      width: 40%; /* largura da faixa */
+      overflow: hidden;
+      background-color: #00aa00; /* verde */
+      z-index: 9999;
+      height: 20px;
+      border-radius: 8px;
+      transition: opacity 1s ease;
+    }
+
+    .scrolling-text span {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: scroll-left 15s linear infinite;
+      font-size: 14px;
+      color: #ffffff; /* branco */
+      line-height: 25px; /* centraliza verticalmente */
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scrolling-text" id="faixa">
+    <span>Lista Vip Desativada</span>
+  </div>
+
+  <script>
+    // Após 10 segundos (10000ms), a faixa desaparece com fade
+    setTimeout(() => {
+      const faixa = document.getElementById('faixa');
+      faixa.style.opacity = '0';
+      setTimeout(() => faixa.style.display = 'none', 1000); // espera o fade-out
+    }, 10000);
+  </script>
+
+</body>
+</html>
 <head>
   <meta charset="UTF-8">
   <title>Digite a senha do cliente. A senha é (2025). Sem ela não abrirá de forma nenhuma as demais opções.</title>
