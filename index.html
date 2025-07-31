@@ -1,114 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>IPTV Player - Pluto TV Style</title>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<style>
-  body, html { margin:0; padding:0; background:#000; color:#fff; font-family:sans-serif; height:100vh; }
-  #senhaSection {
-    height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;
-  }
-  #senhaInput {
-    padding:8px; font-size:16px; width:220px; border-radius:5px; border:none; text-align:center; background:#222; color:#fff;
-  }
-  #senhaBtn {
-    padding:10px 20px; font-size:16px; cursor:pointer; background:#1c1c1c; border:1px solid #444; color:#fff; border-radius:5px;
-  }
-  small { color:#888; }
-
-  .container {
-    display:none; height:100vh; width:100vw; overflow:hidden; display:flex;
-  }
-  .sidebar {
-    background:#111; width:300px; padding:10px; box-sizing:border-box; display:flex; flex-direction:column;
-  }
-  .top-buttons {
-    display:flex; gap:10px; margin-bottom:10px;
-  }
-  .top-buttons button {
-    flex:1; padding:8px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; border:1px solid #444; color:#fff;
-  }
-  .top-buttons button:hover {
-    background:#333;
-  }
-  #vipMenu {
-    display:none; flex-direction:column; gap:5px; margin-bottom:10px;
-  }
-  #vipMenu button {
-    background:#222; border:1px solid #444; padding:6px; border-radius:3px; cursor:pointer; color:#fff;
-  }
-  #vipMenu button:hover { background:#333; }
-  h2 {
-    margin:0 0 10px 0;
-  }
-  .filter-buttons {
-    display:flex; gap:8px; margin-bottom:10px;
-  }
-  .filter-buttons button {
-    flex:1;
-    padding:6px;
-    font-size:14px;
-    cursor:pointer;
-    border-radius:4px;
-    background:#222;
-    color:#fff;
-    border:1px solid #444;
-  }
-  .filter-buttons button:hover {
-    background:#333;
-  }
-  .search-container {
-    display:flex; align-items:center; background:#222; padding:5px; border-radius:5px; margin-bottom:10px;
-  }
-  .search-container input {
-    flex:1; background:transparent; border:none; color:#fff; font-size:14px; padding:5px;
-  }
-  .search-container input::placeholder {
-    color:#888;
-  }
-  #channelList {
-    overflow-y:auto; flex:1;
-  }
-  .channel {
-    display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #222;
-  }
-  .channel:hover, .channel:focus {
-    background:#222;
-    outline:none;
-  }
-  .channel img {
-    width:50px; height:50px; object-fit:contain; margin-right:10px;
-  }
-  .channel-name {
-    flex:1; font-size:16px;
-  }
-  .favorite-btn {
-    margin-left:auto; font-size:20px; background:none; border:none; cursor:pointer; color:gold;
-  }
-  .favorite-btn.not-fav {
-    color:#555;
-  }
-  .main {
-    flex:1; position:relative; display:flex; flex-direction:column;
-  }
-  #videoContainer {
-    position:relative; background:black; width:100%; height:100vh; display:none;
-  }
-  #videoContainer.active {
-    display:block;
-  }
-  video {
-    width:100%; height:100vh; object-fit:contain; background:black;
-  }
-  .player-controls {
-    position:absolute; top:10px; left:50%; transform:translateX(-50%);
-    display:flex; gap:10px; z-index:10; background:rgba(0,0,0,0.5); padding:10px; border-radius:5px;
-  }
-  .player-controls button {
-    padding:6px 12px; font-size:14px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>IPTV Player - Pluto TV Style</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body, html { margin:0; padding:0; background:#000; color:#fff; font-family:sans-serif; height:100vh; }
+    #senhaSection {
+      height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;
+    }
+    #senhaInput {
+      padding:8px; font-size:16px; width:220px; border-radius:5px; border:none; text-align:center; background:#222; color:#fff;
+    }
+    #senhaBtn {
+      padding:10px 20px; font-size:16px; cursor:pointer; background:#1c1c1c; border:1px solid #444; color:#fff; border-radius:5px;
+    }
+    small { color:#888; }
+    .container {
+      height:100vh; width:100vw; overflow:hidden; display:none; /* fica oculto até senha correta */
+      display:flex;
+    }
+    .sidebar {
+      background:#111; width:300px; padding:10px; box-sizing:border-box; display:flex; flex-direction:column;
+    }
+    .top-buttons {
+      display:flex; gap:10px; margin-bottom:10px;
+    }
+    .top-buttons button {
+      flex:1; padding:8px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; border:1px solid #444; color:#fff;
+    }
+    .top-buttons button:hover {
+      background:#333;
+    }
+    #vipMenu {
+      display:none; flex-direction:column; gap:5px; margin-bottom:10px;
+    }
+    #vipMenu button {
+      background:#222; border:1px solid #444; padding:6px; border-radius:3px; cursor:pointer; color:#fff;
+    }
+    #vipMenu button:hover { background:#333; }
+    h2 {
+      margin:0 0 10px 0;
+    }
+    .search-container {
+      display:flex; align-items:center; background:#222; padding:5px; border-radius:5px; margin-bottom:10px;
+    }
+    .search-container input {
+      flex:1; background:transparent; border:none; color:#fff; font-size:14px; padding:5px;
+    }
+    .search-container input::placeholder {
+      color:#888;
+    }
+    #channelList {
+      overflow-y:auto; flex:1;
+    }
+    .channel {
+      display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #222;
+    }
+    .channel:hover, .channel:focus {
+      background:#222;
+      outline:none;
+    }
+    .channel img {
+      width:50px; height:50px; object-fit:contain; margin-right:10px;
+    }
+    .channel-name {
+      flex:1; font-size:16px;
+    }
+    .favorite-btn {
+      margin-left:auto; font-size:20px; background:none; border:none; cursor:pointer; color:gold;
+    }
+    .favorite-btn.not-fav {
+      color:#555;
+    }
+    .main {
+      flex:1; position:relative; display:flex; flex-direction:column;
+    }
+    #videoContainer {
+      position:relative; background:black; width:100%; height:100vh; display:none;
+    }
+    #videoContainer.active {
+      display:block;
+    }
+    video {
+      width:100%; height:100vh; object-fit:contain; background:black;
+    }
+    .player-controls {
+      position:absolute; top:10px; left:50%; transform:translateX(-50%);
+      display:flex; gap:10px; z-index:10; background:rgba(0,0,0,0.5); padding:10px; border-radius:5px;
+    }
+    .player-controls button {
+      padding:6px 12px; font-size:14px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -118,21 +102,22 @@
   <small>Bem Vindo</small>
 </div>
 
-<div class="container" role="main" aria-hidden="true" style="display:none;">
+<div class="container" role="main" aria-hidden="true" aria-live="polite">
   <div class="sidebar" role="navigation" aria-label="Lista de canais e menus">
-    <div class="top-buttons">
+    <div class="top-buttons" id="topButtons" style="display:none;">
       <button id="usarBtn" aria-label="Lista Player">Lista Player</button>
-      <button id="vipBtn" aria-label="Lista VIP">Lista VIP</button>
+      <button id="vipBtn" aria-label="Lista VIP">Lista Vip</button>
     </div>
-    <div id="vipMenu" aria-label="Menu VIP" style="display:none;"></div>
+    <div id="vipMenu" aria-label="Menu VIP"></div>
 
-    <div class="filter-buttons" aria-label="Filtros de canais">
-      <button id="filterTodos">Todos</button>
-      <button id="filterFavoritos">Favoritos</button>
+    <!-- Botões de filtro -->
+    <div id="filterContainer" style="display:none; gap:8px; margin-bottom:10px;">
+      <button id="btnTodos" style="flex:1; padding:6px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; color:#fff; border:1px solid #444;">Todos</button>
+      <button id="btnFavoritos" style="flex:1; padding:6px; font-size:14px; cursor:pointer; border-radius:4px; background:#222; color:#fff; border:1px solid #444;">Favoritos</button>
     </div>
 
-    <h2>Canais</h2>
-    <div class="search-container">
+    <h2 id="channelsTitle" style="display:none;">Canais</h2>
+    <div class="search-container" style="display:none;">
       🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" aria-label="Pesquisar canal"/>
     </div>
     <div id="channelList" tabindex="0" aria-label="Lista de canais"></div>
@@ -150,339 +135,274 @@
 </div>
 
 <script>
-  console.clear();
-  console.log("IPTV Player iniciado");
+const validPwd = ['8888','9999'];
+const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
 
-  // Senhas válidas para o acesso inicial
-  const validPwd = ['8888','9999'];
-  const salvarPwd = '0000'; // senha VIP master para salvar (não usada diretamente aqui)
+const vipUrls = {
+  '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
+  '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
+  '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
+  '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
+  '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
+  '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
+  '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
+  '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
+  '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
+  '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u'
+};
 
-  // URL da lista padrão
-  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8'; 
+let allChannels = [];
+let currentIndex = 0;
+let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-  // URLs VIP com as senhas (chave é senha VIP, valor é URL)
-  const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
-    '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
-    '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
-    '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
-    '0005': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u',
-    '0006': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal6.m3u',
-    '0007': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal7.m3u',
-    '0008': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal8.m3u',
-    '0009': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal9.m3u',
-    '0010': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal10.m3u',
-  };
+const senhaSection = document.getElementById('senhaSection');
+const senhaInput = document.getElementById('senhaInput');
+const senhaBtn = document.getElementById('senhaBtn');
+const container = document.querySelector('.container');
 
-  let allChannels = [];
-  let currentIndex = 0;
-  let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+const usarBtn = document.getElementById('usarBtn');
+const vipBtn = document.getElementById('vipBtn');
+const vipMenu = document.getElementById('vipMenu');
 
-  const senhaSection = document.getElementById('senhaSection');
-  const senhaInput = document.getElementById('senhaInput');
-  const senhaBtn = document.getElementById('senhaBtn');
-  const container = document.querySelector('.container');
+const btnTodos = document.getElementById('btnTodos');
+const btnFavoritos = document.getElementById('btnFavoritos');
+const searchInput = document.getElementById('searchInput');
+const channelList = document.getElementById('channelList');
 
-  const usarBtn = document.getElementById('usarBtn');
-  const vipBtn = document.getElementById('vipBtn');
-  const vipMenu = document.getElementById('vipMenu');
+const videoContainer = document.getElementById('videoContainer');
+const video = document.getElementById('video');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const exitBtn = document.getElementById('exitBtn');
 
-  const filterTodos = document.getElementById('filterTodos');
-  const filterFavoritos = document.getElementById('filterFavoritos');
+const topButtons = document.getElementById('topButtons');
+const filterContainer = document.getElementById('filterContainer');
+const channelsTitle = document.getElementById('channelsTitle');
+const searchContainer = document.querySelector('.search-container');
 
-  const searchInput = document.getElementById('searchInput');
-  const channelList = document.getElementById('channelList');
+// Mostrar interface após senha correta
+function showInterface() {
+  senhaSection.style.display = 'none';
+  container.style.display = 'flex';
+  container.setAttribute('aria-hidden', 'false');
 
-  const videoContainer = document.getElementById('videoContainer');
-  const video = document.getElementById('video');
+  topButtons.style.display = 'flex';
+  filterContainer.style.display = 'flex';
+  channelsTitle.style.display = 'block';
+  searchContainer.style.display = 'flex';
 
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const exitBtn = document.getElementById('exitBtn');
+  // Carregar lista principal
+  loadChannels(listUrl).then(channels => {
+    allChannels = channels;
+    renderChannelList(allChannels);
+  });
+}
 
-  // Mostrar a interface principal após login correto
-  function showMainInterface() {
-    senhaSection.style.display = 'none';
-    container.style.display = 'flex';
-    container.setAttribute('aria-hidden', 'false');
+function savePassword(pwd) {
+  localStorage.setItem('iptv_password', pwd);
+}
+
+function getSavedPassword() {
+  return localStorage.getItem('iptv_password');
+}
+
+function validatePassword(pwd) {
+  return validPwd.includes(pwd);
+}
+
+// Tentar carregar interface se senha válida já estiver salva
+window.onload = () => {
+  const saved = getSavedPassword();
+  if (saved && validatePassword(saved)) {
+    showInterface();
+  } else {
+    senhaInput.focus();
+  }
+};
+
+senhaBtn.onclick = () => {
+  const val = senhaInput.value.trim();
+  if (validatePassword(val)) {
+    savePassword(val);
+    showInterface();
+  } else {
+    alert('Senha inválida!');
     senhaInput.value = '';
+    senhaInput.focus();
   }
+};
 
-  // Salvar senha no localStorage
-  function savePassword(pwd) {
-    localStorage.setItem('iptv_password', pwd);
+senhaInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') senhaBtn.click();
+});
+
+btnTodos.onclick = () => renderChannelList(allChannels);
+btnFavoritos.onclick = () => renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
+
+function saveFavorites() {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+function renderChannelList(channels) {
+  channelList.innerHTML = '';
+  if (channels.length === 0) {
+    channelList.innerHTML = '<p>Nenhum canal encontrado.</p>';
+    return;
   }
+  channels.forEach((channel, index) => {
+    const div = document.createElement('div');
+    div.className = 'channel';
+    div.tabIndex = 0;
+    div.dataset.index = index;
 
-  // Recuperar senha do localStorage
-  function getSavedPassword() {
-    return localStorage.getItem('iptv_password');
-  }
+    const img = document.createElement('img');
+    img.src = channel.tvg_logo || 'https://via.placeholder.com/50?text=No+Logo';
+    img.alt = channel.tvg_name;
+    div.appendChild(img);
 
-  // Remover senha salva (se quiser implementar logout futuramente)
-  function clearSavedPassword() {
-    localStorage.removeItem('iptv_password');
-  }
+    const span = document.createElement('span');
+    span.className = 'channel-name';
+    span.textContent = channel.tvg_name;
+    div.appendChild(span);
 
-  // Função para carregar canais
-  async function loadChannels(url) {
-    try {
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('Falha ao carregar lista');
-      const text = await res.text();
-      return parseM3U(text);
-    } catch(e) {
-      console.error('Erro ao carregar canais:', e);
-      alert('Erro ao carregar canais');
-      return [];
-    }
-  }
-
-  // Parse simples M3U para lista canais
-  function parseM3U(data) {
-    const lines = data.split('\n');
-    const channels = [];
-    let channel = null;
-    for(let i=0; i<lines.length; i++) {
-      let line = lines[i].trim();
-      if(line.startsWith('#EXTINF:')) {
-        const tvg_name = (line.match(/tvg-name="([^"]+)"/i) || [])[1] || '';
-        const tvg_logo = (line.match(/tvg-logo="([^"]+)"/i) || [])[1] || '';
-        const name = line.split(',').pop().trim();
-        channel = {name, tvg_name, tvg_logo};
-      } else if(line && !line.startsWith('#') && channel) {
-        channel.url = line.trim();
-        channels.push(channel);
-        channel = null;
-      }
-    }
-    return channels;
-  }
-
-  // Render lista de canais
-  function renderChannels(list) {
-    channelList.innerHTML = '';
-    if(list.length === 0) {
-      channelList.innerHTML = '<p>Nenhum canal encontrado.</p>';
-      return;
-    }
-    list.forEach((ch, idx) => {
-      const div = document.createElement('div');
-      div.className = 'channel';
-      div.tabIndex = 0;
-      div.setAttribute('role', 'button');
-      div.setAttribute('aria-label', `Canal ${ch.name}`);
-
-      const img = document.createElement('img');
-      img.src = ch.tvg_logo || 'https://cdn-icons-png.flaticon.com/512/727/727399.png';
-      img.alt = ch.name + ' logo';
-      div.appendChild(img);
-
-      const span = document.createElement('span');
-      span.className = 'channel-name';
-      span.textContent = ch.name;
-      div.appendChild(span);
-
-      const favBtn = document.createElement('button');
-      favBtn.className = 'favorite-btn ' + (favorites.includes(ch.name) ? '' : 'not-fav');
-      favBtn.setAttribute('aria-label', favorites.includes(ch.name) ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
-      favBtn.textContent = favorites.includes(ch.name) ? '★' : '☆';
-      favBtn.onclick = (e) => {
-        e.stopPropagation();
-        toggleFavorite(ch.name, favBtn);
-      };
-      div.appendChild(favBtn);
-
-      div.onclick = () => {
-        currentIndex = idx;
-        playChannel(list[currentIndex]);
-      };
-      div.onkeydown = (e) => {
-        if(e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          currentIndex = idx;
-          playChannel(list[currentIndex]);
-        }
-      };
-
-      channelList.appendChild(div);
+    const favBtn = document.createElement('button');
+    favBtn.className = 'favorite-btn';
+    favBtn.innerHTML = favorites.includes(channel.tvg_name) ? '★' : '☆';
+    if (!favorites.includes(channel.tvg_name)) favBtn.classList.add('not-fav');
+    favBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(channel.tvg_name, favBtn);
     });
-  }
+    div.appendChild(favBtn);
 
-  // Alternar favorito
-  function toggleFavorite(channelName, btn) {
-    const idx = favorites.indexOf(channelName);
-    if(idx >= 0) {
-      favorites.splice(idx,1);
-      btn.classList.add('not-fav');
-      btn.textContent = '☆';
-      btn.setAttribute('aria-label', 'Adicionar aos favoritos');
-    } else {
-      favorites.push(channelName);
-      btn.classList.remove('not-fav');
-      btn.textContent = '★';
-      btn.setAttribute('aria-label', 'Remover dos favoritos');
-    }
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }
+    div.addEventListener('click', () => {
+      playChannel(channel);
+      currentIndex = index;
+    });
 
-  // Filtrar canais por favoritos
-  function filterFavorites() {
-    const favChannels = allChannels.filter(ch => favorites.includes(ch.name));
-    renderChannels(favChannels);
-  }
+    channelList.appendChild(div);
+  });
+}
 
-  // Mostrar todos canais
-  function showAllChannels() {
-    renderChannels(allChannels);
+function toggleFavorite(name, btn) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(f => f !== name);
+    btn.innerHTML = '☆';
+    btn.classList.add('not-fav');
+  } else {
+    favorites.push(name);
+    btn.innerHTML = '★';
+    btn.classList.remove('not-fav');
   }
+  saveFavorites();
+}
 
-  // Função de busca
-  function filterSearch(term) {
-    const lower = term.toLowerCase();
-    const filtered = allChannels.filter(ch => ch.name.toLowerCase().includes(lower));
-    renderChannels(filtered);
+function playChannel(channel) {
+  if (!channel || !channel.url) return;
+  videoContainer.classList.add('active');
+  container.setAttribute('aria-hidden', 'true');
+
+  if (window.hls) {
+    window.hls.destroy();
+    window.hls = null;
   }
-
-  // Play canal
-  function playChannel(ch) {
-    if(!ch || !ch.url) return;
-    videoContainer.classList.add('active');
-    video.src = ch.url;
-    video.play();
+  if (Hls.isSupported()) {
+    window.hls = new Hls();
+    window.hls.loadSource(channel.url);
+    window.hls.attachMedia(video);
+  } else {
+    video.src = channel.url;
   }
+  video.play();
+}
 
-  // Parar e esconder player
-  function stopPlayer() {
-    video.pause();
-    video.src = '';
-    videoContainer.classList.remove('active');
-  }
+prevBtn.onclick = () => {
+  currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+nextBtn.onclick = () => {
+  currentIndex = (currentIndex + 1) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+exitBtn.onclick = () => {
+  video.pause();
+  video.src = '';
+  videoContainer.classList.remove('active');
+  container.setAttribute('aria-hidden', 'false');
+};
 
-  // Navegar canais anterior
-  function prevChannel() {
-    if(allChannels.length === 0) return;
-    currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
-    playChannel(allChannels[currentIndex]);
-  }
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase();
+  renderChannelList(allChannels.filter(c => c.tvg_name.toLowerCase().includes(q)));
+});
 
-  // Navegar canais próximo
-  function nextChannel() {
-    if(allChannels.length === 0) return;
-    currentIndex = (currentIndex + 1) % allChannels.length;
-    playChannel(allChannels[currentIndex]);
-  }
+usarBtn.onclick = () => {
+  loadChannels(listUrl).then(channels => {
+    allChannels = channels;
+    renderChannelList(allChannels);
+    vipMenu.style.display = 'none';
+  });
+};
 
-  // Gerar botões VIP no menu
-  function gerarVipButtons() {
-    vipMenu.innerHTML = '';
-    for(let i=1; i<=10; i++) {
-      const numStr = i.toString().padStart(4,'0');
-      const btn = document.createElement('button');
-      btn.textContent = `VIP ${i}`;
-      btn.setAttribute('data-vip', numStr);
-      btn.addEventListener('click', () => {
-        pedirSenhaVip(numStr);
+let vipVisible = false;
+vipBtn.onclick = () => {
+  vipVisible = !vipVisible;
+  vipMenu.innerHTML = '';
+  vipMenu.style.display = vipVisible ? 'flex' : 'none';
+  if (vipVisible) {
+    let idx = 1;
+    for (const key of Object.keys(vipUrls)) {
+      const b = document.createElement('button');
+      b.textContent = `VIP ${idx}`;  // Só mostra VIP 1, VIP 2, etc
+      b.addEventListener('click', () => {
+        const senha = prompt(`Digite a senha para acessar VIP ${idx}:`);
+        if (senha === key) {
+          loadChannels(vipUrls[key]).then(channels => {
+            allChannels = channels;
+            renderChannelList(allChannels);
+          });
+        } else {
+          alert('Senha incorreta!');
+        }
       });
-      vipMenu.appendChild(btn);
+      vipMenu.appendChild(b);
+      idx++;
     }
   }
+};
 
-  // Solicitar senha VIP (com prompt oculto)
-  function pedirSenhaVip(vipNumber) {
-    const senhaVip = prompt(`Digite a senha para VIP ${parseInt(vipNumber,10)}:`, '');
-    if(!senhaVip) return;
-    if(senhaVip === vipNumber) {
-      carregarVip(vipNumber);
-    } else {
-      alert('Senha VIP incorreta!');
+async function loadChannels(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
+    const text = await res.text();
+    return parseM3U(text);
+  } catch (e) {
+    alert('Erro ao carregar canais!');
+    return [];
+  }
+}
+
+function parseM3U(data) {
+  const lines = data.split('\n');
+  const channels = [];
+  let channel = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('#EXTINF:')) {
+      const tvg_name = (line.match(/tvg-name="([^"]+)"/) || [null, 'Canal'])[1];
+      const tvg_logo = (line.match(/tvg-logo="([^"]+)"/) || [null, ''])[1];
+      const group_title = (line.match(/group-title="([^"]+)"/) || [null, ''])[1];
+      channel = { tvg_name, tvg_logo, group_title, url: '' };
+    } else if (line && channel) {
+      channel.url = line;
+      channels.push(channel);
+      channel = null;
     }
   }
-
-  // Carregar lista VIP correspondente
-  async function carregarVip(vipNumber) {
-    const url = vipUrls[vipNumber];
-    if(!url) {
-      alert('Lista VIP não encontrada');
-      return;
-    }
-    allChannels = await loadChannels(url);
-    if(allChannels.length === 0) {
-      alert('Lista VIP vazia ou inválida');
-      return;
-    }
-    currentIndex = 0;
-    showAllChannels();
-  }
-
-  // Eventos botões principais
-  usarBtn.addEventListener('click', async () => {
-    allChannels = await loadChannels(listUrl);
-    currentIndex = 0;
-    showAllChannels();
-  });
-
-  vipBtn.addEventListener('click', () => {
-    if(vipMenu.style.display === 'flex') {
-      vipMenu.style.display = 'none';
-    } else {
-      gerarVipButtons();
-      vipMenu.style.display = 'flex';
-    }
-  });
-
-  filterTodos.addEventListener('click', () => {
-    showAllChannels();
-  });
-
-  filterFavoritos.addEventListener('click', () => {
-    filterFavorites();
-  });
-
-  searchInput.addEventListener('input', (e) => {
-    filterSearch(e.target.value);
-  });
-
-  prevBtn.addEventListener('click', () => {
-    prevChannel();
-  });
-  nextBtn.addEventListener('click', () => {
-    nextChannel();
-  });
-  exitBtn.addEventListener('click', () => {
-    stopPlayer();
-  });
-
-  // Validação da senha inicial
-  senhaBtn.addEventListener('click', () => {
-    const val = senhaInput.value.trim();
-    if(validPwd.includes(val)) {
-      savePassword(val);
-      showMainInterface();
-      // Carregar lista padrão ao entrar
-      usarBtn.click();
-    } else {
-      alert('Senha incorreta!');
-    }
-  });
-
-  // Entrar ao pressionar Enter no campo senha
-  senhaInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') {
-      senhaBtn.click();
-    }
-  });
-
-  // Ao carregar a página, verificar se já tem senha salva
-  window.addEventListener('load', () => {
-    const saved = getSavedPassword();
-    if(saved && validPwd.includes(saved)) {
-      showMainInterface();
-      usarBtn.click();
-    } else {
-      senhaSection.style.display = 'flex';
-      container.style.display = 'none';
-    }
-  });
+  return channels;
+}
 </script>
+
 </body>
 </html>
