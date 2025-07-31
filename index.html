@@ -134,7 +134,7 @@
   const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
 
   const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
+    '0001': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal1.m3u',
     '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
     '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
     '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
@@ -243,9 +243,9 @@
     const sortedVips = Object.keys(vipUrls).sort((a, b) => Number(a) - Number(b));
     for(const senha of sortedVips){
       const btn = document.createElement('button');
-      btn.textContent = `Vip${Number(senha)}`;
+      btn.textContent = Vip${Number(senha)};
       btn.onclick = () => {
-        const pass = prompt(`Digite a senha para VIP ${senha}:`);
+        const pass = prompt(Digite a senha para VIP ${senha}:);
         if(pass === senha){
           loadAndSave(vipUrls[senha]);
           vipMenu.style.display = 'none';
@@ -300,7 +300,7 @@
         if(lines[i].startsWith('#EXTINF')){
           const nameMatch = lines[i].match(/,(.*)/);
           const logoMatch = lines[i].match(/tvg-logo="([^"]*)"/);
-          const name = nameMatch ? nameMatch[1] : `Canal ${i}`;
+          const name = nameMatch ? nameMatch[1] : Canal ${i};
           const logo = logoMatch ? logoMatch[1] : '';
           const urlLine = lines[i+1] ? lines[i+1].trim() : '';
           if(urlLine.startsWith('http')){
@@ -339,11 +339,11 @@
       const div = document.createElement('div');
       div.className = 'channel';
       div.tabIndex = 0;
-      div.innerHTML = `
+      div.innerHTML = 
         <img src="${ch.logo}" alt="${ch.name}" />
         <span class="channel-name">${ch.name}</span>
         <button class="favorite-btn ${favorites.includes(ch.url) ? '' : 'not-fav'}" title="Favoritar canal">&#9733;</button>
-      `;
+      ;
 
       const favBtn = div.querySelector('.favorite-btn');
       favBtn.onclick = (e) => {
@@ -372,7 +372,7 @@
 
     // Caso filtro deixe lista vazia, avisa usuário
     if(filtered.length === 0){
-      channelList.innerHTML = `<p style="color:#888; padding:10px;">Nenhum canal encontrado.</p>`;
+      channelList.innerHTML = <p style="color:#888; padding:10px;">Nenhum canal encontrado.</p>;
     }
   }
 
