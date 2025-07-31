@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>IPTV Player</title>
+  <title>Digite a senha do cliente. A senha é (2025). Sem ela não abrirá de forma nenhuma as demais opções.</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body, html {
@@ -13,7 +13,7 @@
       height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
     }
     #senhaInput {
-      padding: 10px; font-size: 16px; border: none; border-radius: 5px; width: 200px;
+      padding: 10px; font-size: 16px; border: none; border-radius: 5px; width: 300px;
       background: #222; color: #fff; text-align: center;
     }
     #senhaBtn {
@@ -67,7 +67,7 @@
 <body>
 
 <div id="senhaSection">
-  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" />
+  <input id="senhaInput" type="password" placeholder="Digite sua senha" />
   <button id="senhaBtn">Entrar</button>
 </div>
 
@@ -119,7 +119,7 @@ const btnFavoritos = document.getElementById('btnFavoritos');
 
 senhaBtn.onclick = () => {
   const val = senhaInput.value.trim();
-  if (val.length >= 4) {
+  if (val === '2025') {
     localStorage.setItem('iptv_password', val);
     senhaSection.style.display = 'none';
     container.style.display = 'flex';
@@ -131,7 +131,7 @@ senhaBtn.onclick = () => {
 
 window.onload = () => {
   const saved = localStorage.getItem('iptv_password');
-  if (saved) {
+  if (saved === '2025') {
     senhaSection.style.display = 'none';
     container.style.display = 'flex';
     carregarLista(listaSalvaUrl);
@@ -256,10 +256,15 @@ document.getElementById('nextBtn').onclick = () => {
 
 btnListaSalva.onclick = () => carregarLista(listaSalvaUrl);
 btnTodos.onclick = () => renderChannelList(allChannels);
-btnFavoritos.onclick = () => renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
+
+// ✅ MUDANÇA 2: Botão "Favoritos" agora só mostra os favoritos
+btnFavoritos.onclick = () => {
+  const canaisFavoritos = allChannels.filter(c => favorites.includes(c.tvg_name));
+  renderChannelList(canaisFavoritos);
+};
 
 btnVip.onclick = () => {
-  const senha = prompt('Digite a senha da lista VIP (ex: 0001):');
+  const senha = prompt('Digite a senha da lista VIP :');
   if (vipUrls[senha]) {
     carregarLista(vipUrls[senha]);
   } else {
