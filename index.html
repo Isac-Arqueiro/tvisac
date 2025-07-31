@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -95,46 +96,48 @@
 </head>
 <body>
 
-<div id="senhaSection">
-  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" />
-  <button id="senhaBtn">Entrar</button>
+<div id="senhaSection" role="dialog" aria-modal="true" aria-label="Tela de senha">
+  <input id="senhaInput" type="password" placeholder="Digite a senha do cliente" autocomplete="off" aria-label="Campo de senha"/>
+  <button id="senhaBtn" aria-label="Botão entrar">Entrar</button>
   <small>Bem Vindo</small>
 </div>
 
-<div class="container">
-  <div class="sidebar">
+<div class="container" role="main" aria-hidden="true">
+  <div class="sidebar" role="navigation" aria-label="Lista de canais e menus">
     <div class="top-buttons">
-      <button id="usarBtn">Lista Player</button>
-      <button id="vipBtn">Lista Vip</button>
+      <button id="usarBtn" aria-label="Lista Player">Lista Player</button>
+      <button id="vipBtn" aria-label="Lista VIP">Lista Vip</button>
     </div>
-    <div id="vipMenu"></div>
+    <div id="vipMenu" aria-label="Menu VIP"></div>
     <h2>Canais</h2>
-    <!-- Barra de filtros vai ser inserida aqui via JS -->
     <div class="search-container">
-      🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" />
+      🔍<input id="searchInput" type="text" placeholder="Pesquisar canal..." autocomplete="off" aria-label="Pesquisar canal"/>
     </div>
-    <div id="channelList"></div>
+    <div id="channelList" tabindex="0" aria-label="Lista de canais"></div>
   </div>
   <div class="main">
-    <div id="videoContainer">
+    <div id="videoContainer" aria-live="polite">
       <video id="video" controls autoplay></video>
       <div class="player-controls">
-        <button id="prevBtn">⏮️ Voltar</button>
-        <button id="nextBtn">⏭️ Próximo</button>
-        <button id="exitBtn">Menu 📺</button>
+        <button id="prevBtn" aria-label="Voltar canal">⏮️ Voltar</button>
+        <button id="nextBtn" aria-label="Próximo canal">⏭️ Próximo</button>
+        <button id="exitBtn" aria-label="Voltar ao menu">Menu 📺</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  const validPwd = ['8888','9999'];
-  const salvarPwd = '0000';
+  console.clear();
+  console.log("IPTV Player iniciado");
 
-  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8';
+  const validPwd = ['8888','9999'];
+  const salvarPwd = '0000'; // senha VIP master para salvar (não usada diretamente aqui)
+
+  const listUrl = 'https://iptv.vivatele.com//get.php?username=viva_padrao&password=viva2384&type=m3u_plus&output=m3u8'; // LINK TESTE FUNCIONAL - substitua pelo seu
 
   const vipUrls = {
-    '0001': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal1.m3u',
+    '0001': 'https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais',
     '0002': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal2.m3u',
     '0003': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal3.m3u',
     '0004': 'https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u',
@@ -178,225 +181,265 @@
   filterContainer.style.marginBottom = '10px';
 
   // Função para aplicar filtro por categoria
-  function applyCategoryFilter(cat) {
-    if(cat === 'Favoritos'){
-      renderChannels('', true);
-    } else if(cat === 'Todos'){
-      renderChannels('');
-    }
-  }
-
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.textContent = cat;
-    btn.style.flex = '1';
-    btn.style.padding = '6px';
-    btn.style.fontSize = '14px';
-    btn.style.cursor = 'pointer';
-    btn.style.borderRadius = '4px';
-    btn.style.background = '#222';
-    btn.style.color = '#fff';
-    btn.style.border = '1px solid #444';
-    btn.addEventListener('click', () => applyCategoryFilter(cat));
-    btn.addEventListener('mouseover', () => btn.style.background = '#333');
-    btn.addEventListener('mouseout', () => btn.style.background = '#222');
-    filterContainer.appendChild(btn);
-  });
-
-  // Insere a barra de filtros logo após o título "Canais"
-  const titleCanais = sidebar.querySelector('h2');
-  titleCanais.insertAdjacentElement('afterend', filterContainer);
-
-  // Inicial - se senha salva válida, mostra container
-  window.onload = () => {
-    const cpwd = localStorage.getItem('cpwd');
-    if(cpwd && validPwd.includes(cpwd)) {
-      senhaSection.style.display = 'none';
-      container.style.display = 'flex';
-      loadFromStorageOrEmpty();
-    }
-  };
-
-  senhaBtn.onclick = () => {
-    const val = senhaInput.value.trim();
-    if(validPwd.includes(val)){
-      localStorage.setItem('cpwd', val);
-      senhaSection.style.display = 'none';
-      container.style.display = 'flex';
-      loadFromStorageOrEmpty();
+  function applyFilter(category) {
+    if(category === 'Favoritos') {
+      renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
     } else {
-      alert('Senha inválida!');
-    }
-    senhaInput.value = '';
-  };
-
-  usarBtn.onclick = () => {
-    vipMenu.style.display = 'none';
-    loadAndSave(listUrl);
-  };
-
-  vipBtn.onclick = () => {
-    vipMenu.innerHTML = '';
-    vipMenu.style.display = vipMenu.style.display === 'flex' ? 'none' : 'flex';
-
-    // Ordenar numericamente as chaves VIP para exibir botões Vip1, Vip2...
-    const sortedVips = Object.keys(vipUrls).sort((a, b) => Number(a) - Number(b));
-    for(const senha of sortedVips){
-      const btn = document.createElement('button');
-      btn.textContent = Vip${Number(senha)};
-      btn.onclick = () => {
-        const pass = prompt(Digite a senha para VIP ${senha}:);
-        if(pass === senha){
-          loadAndSave(vipUrls[senha]);
-          vipMenu.style.display = 'none';
-        } else alert('Senha incorreta!');
-      };
-      vipMenu.appendChild(btn);
-    }
-  };
-
-  searchInput.oninput = () => renderChannels(searchInput.value);
-
-  prevBtn.onclick = () => {
-    if(allChannels.length === 0) return;
-    currentIndex--;
-    if(currentIndex < 0) currentIndex = allChannels.length - 1;
-    playChannel(currentIndex);
-  };
-
-  nextBtn.onclick = () => {
-    if(allChannels.length === 0) return;
-    currentIndex++;
-    if(currentIndex >= allChannels.length) currentIndex = 0;
-    playChannel(currentIndex);
-  };
-
-  exitBtn.onclick = () => {
-    video.pause();
-    video.src = '';
-    videoContainer.classList.remove('active');
-    container.style.display = 'none';
-    senhaSection.style.display = 'flex';
-    localStorage.removeItem('cpwd');
-  };
-
-  // Funções auxiliares
-  function loadFromStorageOrEmpty() {
-    const stored = localStorage.getItem('channels');
-    if(stored) {
-      allChannels = JSON.parse(stored);
-      renderChannels('');
-      if(allChannels.length > 0) playChannel(0);
+      renderChannelList(allChannels);
     }
   }
 
-  async function loadAndSave(url) {
+  function createFilterButtons() {
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.textContent = cat;
+      btn.style.flex = '1';
+      btn.style.padding = '6px';
+      btn.style.fontSize = '14px';
+      btn.style.cursor = 'pointer';
+      btn.style.borderRadius = '4px';
+      btn.style.background = '#222';
+      btn.style.color = '#fff';
+      btn.style.border = '1px solid #444';
+      btn.addEventListener('click', () => {
+        applyFilter(cat);
+      });
+      filterContainer.appendChild(btn);
+    });
+    sidebar.insertBefore(filterContainer, sidebar.firstChild);
+  }
+
+  createFilterButtons();
+
+  // Função para salvar favoritos
+  function saveFavorites() {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }
+
+  // Função para carregar canais do arquivo M3U (simples)
+  async function loadChannels(url) {
     try {
       const res = await fetch(url);
+      if(!res.ok) throw new Error('Falha ao carregar lista');
       const text = await res.text();
-      const lines = text.split('\n');
-      const channels = [];
-      for(let i=0; i < lines.length; i++){
-        if(lines[i].startsWith('#EXTINF')){
-          const nameMatch = lines[i].match(/,(.*)/);
-          const logoMatch = lines[i].match(/tvg-logo="([^"]*)"/);
-          const name = nameMatch ? nameMatch[1] : Canal ${i};
-          const logo = logoMatch ? logoMatch[1] : '';
-          const urlLine = lines[i+1] ? lines[i+1].trim() : '';
-          if(urlLine.startsWith('http')){
-            channels.push({name, logo, url: urlLine});
-          }
-        }
-      }
-      if(channels.length === 0){
-        alert('Nenhum canal encontrado na lista.');
-        return;
-      }
-      allChannels = channels;
-      currentIndex = 0;
-      localStorage.setItem('channels', JSON.stringify(allChannels));
-      renderChannels('');
-      playChannel(0);
+      return parseM3U(text);
     } catch(e) {
-      alert('Erro ao carregar a lista.');
-      console.error(e);
+      console.error('Erro ao carregar canais:', e);
+      alert('Erro ao carregar canais');
+      return [];
     }
   }
 
-  function renderChannels(filter, isFavorite = false) {
-    channelList.innerHTML = '';
-
-    let filtered = allChannels;
-
-    if(isFavorite){
-      filtered = allChannels.filter(ch => favorites.includes(ch.url));
-    } else if(filter && filter !== '') {
-      const filterLower = filter.toLowerCase();
-      filtered = allChannels.filter(ch => ch.name.toLowerCase().includes(filterLower));
+  // Função simples para parsear M3U em objetos canal
+  function parseM3U(data) {
+    const lines = data.split('\n');
+    const channels = [];
+    let channel = null;
+    for(let i=0; i<lines.length; i++) {
+      let line = lines[i].trim();
+      if(line.startsWith('#EXTINF:')) {
+        // EX: #EXTINF:-1 tvg-id="..." tvg-name="Channel" tvg-logo="..." group-title="..."
+        const tvg_name = (line.match(/tvg-name="([^"]+)"/) || [null, 'Canal'])[1];
+        const tvg_logo = (line.match(/tvg-logo="([^"]+)"/) || [null, ''])[1];
+        const group_title = (line.match(/group-title="([^"]+)"/) || [null, ''])[1];
+        channel = {tvg_name, tvg_logo, group_title, url:''};
+      } else if(line && channel) {
+        channel.url = line;
+        channels.push(channel);
+        channel = null;
+      }
     }
+    console.log(`Canais carregados: ${channels.length}`);
+    return channels;
+  }
 
-    filtered.forEach((ch, i) => {
+  // Renderizar lista de canais
+  function renderChannelList(channels) {
+    channelList.innerHTML = '';
+    if(channels.length === 0) {
+      channelList.innerHTML = '<p>Nenhum canal encontrado.</p>';
+      return;
+    }
+    channels.forEach((channel, index) => {
       const div = document.createElement('div');
       div.className = 'channel';
       div.tabIndex = 0;
-      div.innerHTML = 
-        <img src="${ch.logo}" alt="${ch.name}" />
-        <span class="channel-name">${ch.name}</span>
-        <button class="favorite-btn ${favorites.includes(ch.url) ? '' : 'not-fav'}" title="Favoritar canal">&#9733;</button>
-      ;
+      div.setAttribute('role','button');
+      div.setAttribute('aria-label', `Canal ${channel.tvg_name}`);
+      div.dataset.index = index;
 
-      const favBtn = div.querySelector('.favorite-btn');
-      favBtn.onclick = (e) => {
+      const img = document.createElement('img');
+      img.src = channel.tvg_logo || 'https://via.placeholder.com/50?text=No+Logo';
+      img.alt = channel.tvg_name;
+      div.appendChild(img);
+
+      const span = document.createElement('span');
+      span.className = 'channel-name';
+      span.textContent = channel.tvg_name;
+      div.appendChild(span);
+
+      const favBtn = document.createElement('button');
+      favBtn.className = 'favorite-btn';
+      favBtn.innerHTML = favorites.includes(channel.tvg_name) ? '★' : '☆';
+      if(!favorites.includes(channel.tvg_name)) favBtn.classList.add('not-fav');
+      favBtn.title = favorites.includes(channel.tvg_name) ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
+      favBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const idxFav = favorites.indexOf(ch.url);
-        if(idxFav === -1) {
-          favorites.push(ch.url);
-          favBtn.classList.remove('not-fav');
-        } else {
-          favorites.splice(idxFav, 1);
-          favBtn.classList.add('not-fav');
-        }
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-      };
+        toggleFavorite(channel.tvg_name, favBtn);
+      });
+      div.appendChild(favBtn);
 
-      div.onclick = () => {
-        const idx = allChannels.indexOf(ch);
-        if(idx !== -1){
-          currentIndex = idx;
-          playChannel(currentIndex);
+      div.addEventListener('click', () => {
+        playChannel(channel);
+        currentIndex = index;
+      });
+
+      div.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          playChannel(channel);
+          currentIndex = index;
         }
-      };
+      });
 
       channelList.appendChild(div);
     });
-
-    // Caso filtro deixe lista vazia, avisa usuário
-    if(filtered.length === 0){
-      channelList.innerHTML = <p style="color:#888; padding:10px;">Nenhum canal encontrado.</p>;
-    }
   }
 
-  function playChannel(index) {
-    if(!allChannels[index]) return;
-    currentIndex = index;
-    const ch = allChannels[index];
-    if(Hls.isSupported()){
+  function toggleFavorite(name, btn) {
+    if(favorites.includes(name)) {
+      favorites = favorites.filter(f => f !== name);
+      btn.innerHTML = '☆';
+      btn.classList.add('not-fav');
+      btn.title = 'Adicionar aos favoritos';
+    } else {
+      favorites.push(name);
+      btn.innerHTML = '★';
+      btn.classList.remove('not-fav');
+      btn.title = 'Remover dos favoritos';
+    }
+    saveFavorites();
+  }
+
+  // Tocar canal
+  function playChannel(channel) {
+    if(!channel || !channel.url) return;
+    console.log('Tocando canal:', channel.tvg_name, channel.url);
+    container.setAttribute('aria-hidden', 'true');
+    videoContainer.classList.add('active');
+    video.src = channel.url;
+
+    // Tentativa de usar HLS.js se necessário
+    if(Hls.isSupported()) {
       if(window.hls) {
         window.hls.destroy();
       }
-      const hls = new Hls();
-      window.hls = hls;
-      hls.loadSource(ch.url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play();
+      window.hls = new Hls();
+      window.hls.loadSource(channel.url);
+      window.hls.attachMedia(video);
+      window.hls.on(Hls.Events.ERROR, function(event, data) {
+        console.error('Erro HLS:', data);
       });
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = channel.url;
     } else {
-      video.src = ch.url;
-      video.play();
+      alert('Seu navegador não suporta reprodução deste formato.');
     }
-    videoContainer.classList.add('active');
+    video.play();
   }
+
+  // Navegação canais
+  function nextChannel() {
+    currentIndex = (currentIndex + 1) % allChannels.length;
+    playChannel(allChannels[currentIndex]);
+  }
+  function prevChannel() {
+    currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+    playChannel(allChannels[currentIndex]);
+  }
+
+  // Voltar ao menu
+  function exitPlayer() {
+    video.pause();
+    video.src = '';
+    videoContainer.classList.remove('active');
+    container.setAttribute('aria-hidden', 'false');
+    senhaInput.focus();
+  }
+
+  // Filtrar canais pela busca
+  function filterChannels() {
+    const q = searchInput.value.toLowerCase();
+    if(q === '') {
+      renderChannelList(allChannels);
+      return;
+    }
+    const filtered = allChannels.filter(c => c.tvg_name.toLowerCase().includes(q));
+    renderChannelList(filtered);
+  }
+
+  // Eventos botão senha
+  senhaBtn.onclick = () => {
+    const val = senhaInput.value.trim();
+    console.log('Senha digitada:', val);
+    if(validPwd.includes(val)) {
+      // Senha correta
+      senhaSection.style.display = 'none';
+      container.style.display = 'flex';
+      container.setAttribute('aria-hidden', 'false');
+      loadChannels(listUrl).then(channels => {
+        allChannels = channels;
+        renderChannelList(allChannels);
+      });
+      senhaInput.value = '';
+    } else {
+      alert('Senha inválida!');
+    }
+  };
+
+  // Atalho enter na senha
+  senhaInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') senhaBtn.click();
+  });
+
+  // Botões top
+  usarBtn.onclick = () => {
+    console.log('Botão Lista Player clicado');
+    loadChannels(listUrl).then(channels => {
+      allChannels = channels;
+      renderChannelList(allChannels);
+      vipMenu.style.display = 'none';
+    });
+  };
+
+  vipBtn.onclick = () => {
+    console.log('Botão Lista VIP clicado');
+    vipMenu.innerHTML = '';
+    for(const [key, url] of Object.entries(vipUrls)) {
+      const b = document.createElement('button');
+      b.textContent = `VIP ${key}`;
+      b.addEventListener('click', () => {
+        loadChannels(url).then(channels => {
+          allChannels = channels;
+          renderChannelList(allChannels);
+          vipMenu.style.display = 'flex';
+        });
+      });
+      vipMenu.appendChild(b);
+    }
+    vipMenu.style.display = 'flex';
+  };
+
+  searchInput.addEventListener('input', filterChannels);
+
+  prevBtn.onclick = prevChannel;
+  nextBtn.onclick = nextChannel;
+  exitBtn.onclick = exitPlayer;
+
+  // Foco inicial na senha
+  window.onload = () => {
+    senhaInput.focus();
+  };
+
 </script>
 
 </body>
