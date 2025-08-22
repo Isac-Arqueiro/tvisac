@@ -1,0 +1,20 @@
+{
+  "name": "IS App",
+  "short_name": "IS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e90ff",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/iGMGa5z.jpeg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.imgur.com/iGMGa5z.jpeg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
