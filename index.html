@@ -309,7 +309,17 @@
       autoPlay: true,
       width: '100%',
       height: '100%',
-      poster: canal.tvg_logo || ''
+      poster: canal.tvg_logo || '',
+      playback: {
+        crossOrigin: 'anonymous',
+        hlsjsConfig: {
+          xhrSetup: function (xhr, url) {
+            xhr.setRequestHeader('Referer', window.location.origin);
+            xhr.setRequestHeader('User-Agent', navigator.userAgent);
+          },
+          debug: false
+        }
+      }
     });
 
     const elem = document.getElementById('videoContainer');
@@ -393,12 +403,3 @@ if ("serviceWorker" in navigator) {
 </a>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
