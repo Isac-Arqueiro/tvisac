@@ -2,20 +2,22 @@
 <html lang="pt-BR">
 <head>
   <link rel="manifest" href="manifest.json">
-<link rel="icon" href="https://i.imgur.com/jFQiZvL.jpeg">
-<link rel="apple-touch-icon" href="https://i.imgur.com/jFQiZvL.jpeg">
-<meta name="theme-color" content="#1e90ff">
+  <link rel="icon" href="https://i.imgur.com/jFQiZvL.jpeg">
+  <link rel="apple-touch-icon" href="https://i.imgur.com/jFQiZvL.jpeg">
+  <meta name="theme-color" content="#1e90ff">
 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker registrado'))
-      .catch(err => console.error('Erro ao registrar SW', err));
-  }
-</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.error('Erro ao registrar SW', err));
+    }
+  </script>
+
   <meta charset="UTF-8">
   <title>Site em teste</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       margin: 0;
@@ -128,6 +130,7 @@
       cursor: pointer;
     }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
 </head>
 <body>
@@ -140,6 +143,7 @@
   <input id="senhaInput" type="password" placeholder="Digite sua senha" />
   <button id="senhaBtn">Entrar</button>
 </div>
+
 <div class="container">
   <div class="sidebar">
     <div class="top-buttons">
@@ -151,6 +155,7 @@
     <h2>CANAIS</h2>
     <div id="channelList"></div>
   </div>
+
   <div class="main">
     <div id="videoContainer">
       <div id="player"></div>
@@ -188,9 +193,7 @@
       senhaSection.style.display = 'none';
       container.style.display = 'flex';
       banner.style.display = 'block';
-      setTimeout(() => {
-        banner.style.display = 'none';
-      }, 30000);
+      setTimeout(() => banner.style.display = 'none', 30000);
       carregarLista(listaSalvaUrl);
     } else {
       alert('Senha inválida!');
@@ -203,9 +206,7 @@
       senhaSection.style.display = 'none';
       container.style.display = 'flex';
       banner.style.display = 'block';
-      setTimeout(() => {
-        banner.style.display = 'none';
-      }, 30000);
+      setTimeout(() => banner.style.display = 'none', 30000);
       carregarLista(listaSalvaUrl);
     }
   };
@@ -296,48 +297,57 @@
 
   let clapprPlayer = null;
 
+  /* 🚀 NOVA FUNÇÃO: abre Pluto TV direto no navegador */
   function playChannel(canal) {
     if (!canal.url) return;
+
     if (clapprPlayer) {
       clapprPlayer.destroy();
       clapprPlayer = null;
     }
-    videoContainer.classList.add('active');
+
+    // Detecta se é link da Pluto TV
+    const isPluto = canal.url.includes("pluto.tv");
+
+    if (isPluto) {
+      const confirmOpen = confirm("Este canal só pode ser aberto direto. Deseja abrir agora?");
+      if (confirmOpen) {
+        window.open(canal.url, "_blank");
+      }
+      return; // não tenta abrir no player interno
+    }
+
+    // Caso contrário, reproduz normalmente
+    videoContainer.classList.add("active");
     clapprPlayer = new Clappr.Player({
       source: canal.url,
-      parentId: '#player',
+      parentId: "#player",
       autoPlay: true,
-      width: '100%',
-      height: '100%',
-      poster: canal.tvg_logo || '',
+      width: "100%",
+      height: "100%",
+      poster: canal.tvg_logo || "",
       playback: {
-        crossOrigin: 'anonymous',
+        crossOrigin: "anonymous",
         hlsjsConfig: {
           xhrSetup: function (xhr, url) {
-            xhr.setRequestHeader('Referer', window.location.origin);
-            xhr.setRequestHeader('User-Agent', navigator.userAgent);
+            xhr.setRequestHeader("Referer", window.location.origin);
+            xhr.setRequestHeader("User-Agent", navigator.userAgent);
           },
           debug: false
         }
       }
     });
 
-    const elem = document.getElementById('videoContainer');
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
-    }
+    const elem = document.getElementById("videoContainer");
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
   }
 
   document.getElementById('exitBtn').onclick = () => {
     if (clapprPlayer) clapprPlayer.destroy();
     videoContainer.classList.remove('active');
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
+    if (document.fullscreenElement) document.exitFullscreen();
   };
 
   document.getElementById('prevBtn').onclick = () => {
@@ -365,7 +375,9 @@
     }
   };
 </script>
-  <button id="btnInstall" style="display:none;">📲 Instalar App</button>
+
+<button id="btnInstall" style="display:none;">📲 Instalar App</button>
+
 <script>
 let deferredPrompt;
 const btnInstall = document.getElementById("btnInstall");
@@ -386,20 +398,19 @@ btnInstall.addEventListener("click", async () => {
   }
 });
 
-// Registrar Service Worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
     .then(() => console.log("SW registrado"))
     .catch(err => console.error("Erro SW:", err));
 }
 </script>
- <a href=" https://sites.google.com/view/teste-helyssom/pagamento-2" target="_blank" 
-   style="display:inline-block;padding:10px 18px;
-          background:#007bff;color:white;
-          border:none;border-radius:6px;
-          text-decoration:none;font-weight:bold;
+
+<a href="https://sites.google.com/view/teste-helyssom/pagamento-2" target="_blank" 
+   style="display:inline-block;padding:10px 18px;background:#007bff;color:white;
+          border:none;border-radius:6px;text-decoration:none;font-weight:bold;
           font-family:sans-serif;">
    Dúvidas e Pagamento
 </a>
+
 </body>
 </html>
