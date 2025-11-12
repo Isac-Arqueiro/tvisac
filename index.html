@@ -226,7 +226,7 @@
   const banner = document.getElementById('banner');
 
   // TEMPO DIÁRIO
-  const DAILY_LIMIT_MS = 60*60*1000; // 1 hora
+  const DAILY_LIMIT_MS = 30*60*1000; // 1 hora
   let startTime = parseInt(localStorage.getItem('dailyStartTime')) || Date.now();
   let elapsed = parseInt(localStorage.getItem('dailyElapsed')) || 0;
   const timerDisplay = document.getElementById('timerDisplay');
@@ -480,3 +480,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
