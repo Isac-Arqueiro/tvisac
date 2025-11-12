@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,183 +5,6 @@
   <link rel="icon" href="https://i.imgur.com/jFQiZvL.jpeg">
   <link rel="apple-touch-icon" href="https://i.imgur.com/jFQiZvL.jpeg">
   <meta name="theme-color" content="#1e90ff">
-<script>
-// =============================
-// 👥 + ⏰ CONTADOR DE ONLINE + TEMPO RESTANTE + BARRA DE PROGRESSO
-// =============================
-
-// seleciona o banner existente
-const banner = document.getElementById('banner');
-
-// cria o container visual (contador + barra)
-const infoContainer = document.createElement("div");
-infoContainer.style.cssText = `
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  margin-left:20px;
-  font-weight:bold;
-  font-size:15px;
-  color:#0ff;
-`;
-banner.appendChild(infoContainer);
-
-// linha superior com texto
-const infoTopo = document.createElement("span");
-infoTopo.textContent = "👥 Carregando...";
-infoContainer.appendChild(infoTopo);
-
-// barra de progresso
-const barra = document.createElement("div");
-barra.style.cssText = `
-  width:200px;
-  height:8px;
-  background:#222;
-  border-radius:4px;
-  margin-top:6px;
-  overflow:hidden;
-`;
-const barraInterna = document.createElement("div");
-barraInterna.style.cssText = `
-  width:0%;
-  height:100%;
-  background:linear-gradient(90deg, #0ff, #00ff00);
-  transition:width 0.3s ease;
-`;
-barra.appendChild(barraInterna);
-infoContainer.appendChild(barra);
-
-// animação de piscar
-const styleBlink = document.createElement("style");
-styleBlink.textContent = `
-@keyframes blinkOnline {
-  0% { color: #00ff00; }
-  50% { color: #fff; }
-  100% { color: #00ff00; }
-}`;
-document.head.appendChild(styleBlink);
-
-// chave única do contador (pode trocar o nome)
-const siteKey = "iptvsite_online_2025";
-
-// controle do tempo
-const LIMITE_MS = 60 * 60 * 1000; // 1 hora
-let restanteMinutos = 60; // começa com 60
-
-// função principal que atualiza o topo
-async function atualizarOnline() {
-  try {
-    const res = await fetch(`https://api.countapi.xyz/hit/${siteKey}/visitas`);
-    const data = await res.json();
-    const visitantes = data.value;
-    atualizarDisplay(visitantes);
-  } catch {
-    atualizarDisplay(1);
-  }
-}
-
-// função que atualiza o texto e estilo
-function atualizarDisplay(visitantes) {
-  let cor = "#0ff";
-  let animacao = "none";
-
-  if (visitantes > 50) {
-    cor = "#ff4040"; // vermelho
-    animacao = "blinkOnline 1s infinite";
-  } else if (visitantes > 30) {
-    cor = "#00ff00"; // verde piscando
-    animacao = "blinkOnline 1s infinite";
-  }
-
-  infoTopo.style.color = cor;
-  infoTopo.style.animation = animacao;
-
-  infoTopo.textContent = `👥 ${visitantes} online | 🕒 Restante: ${restanteMinutos} min`;
-
-  // porcentagem usada
-  const porcentagemUsada = 100 - Math.max(0, Math.min(100, (restanteMinutos / 60) * 100));
-  barraInterna.style.width = `${porcentagemUsada}%`;
-
-  // muda cor da barra conforme uso
-  if (porcentagemUsada < 70) {
-    barraInterna.style.background = "linear-gradient(90deg,#0ff,#00ff00)";
-  } else if (porcentagemUsada < 90) {
-    barraInterna.style.background = "linear-gradient(90deg,#ffff00,#ffaa00)";
-  } else {
-    barraInterna.style.background = "linear-gradient(90deg,#ff0000,#ff6600)";
-  }
-}
-
-// atualiza visitantes e tempo a cada 15s
-atualizarOnline();
-setInterval(atualizarOnline, 15000);
-
-
-// =============================
-// ⏰ BLOQUEIO DE 1 HORA POR DIA (SÓ PARA SENHA 2025)
-// =============================
-if (localStorage.getItem("iptv_password") === "2025") {
-  const hoje = new Date().toLocaleDateString();
-  const chave = "uso_diario_iptv";
-  const dados = JSON.parse(localStorage.getItem(chave) || "{}");
-
-  // zera se for novo dia
-  if (dados.data !== hoje) {
-    localStorage.setItem(chave, JSON.stringify({ data: hoje, tempo: 0 }));
-  }
-
-  let inicio = Date.now();
-  let bloqueado = false;
-
-  function atualizarTempoRestante() {
-    const agora = Date.now();
-    const dadosAtuais = JSON.parse(localStorage.getItem(chave));
-    const totalHoje = (dadosAtuais.tempo || 0) + (agora - inicio);
-
-    // calcula minutos restantes
-    restanteMinutos = Math.max(0, Math.ceil((LIMITE_MS - totalHoje) / 60000));
-    atualizarDisplay(parseInt(infoTopo.textContent) || 0);
-
-    if (restanteMinutos <= 0 && !bloqueado) {
-      bloqueado = true;
-      localStorage.setItem(chave, JSON.stringify({ data: hoje, tempo: LIMITE_MS }));
-      bloquearTela();
-    }
-  }
-
-  // atualiza tempo + barra a cada 15s
-  setInterval(atualizarTempoRestante, 15000);
-
-  // salva o tempo usado ao sair
-  window.addEventListener("beforeunload", () => {
-    const tempoSessao = Date.now() - inicio;
-    const dadosAtuais = JSON.parse(localStorage.getItem(chave));
-    const novoTempo = Math.min((dadosAtuais.tempo || 0) + tempoSessao, LIMITE_MS);
-    localStorage.setItem(chave, JSON.stringify({ data: hoje, tempo: novoTempo }));
-  });
-
-  // função de bloqueio
-  function bloquearTela() {
-    document.body.innerHTML = `
-      <div style="
-        display:flex;flex-direction:column;justify-content:center;align-items:center;
-        height:100vh;background:#000;color:#fff;font-family:sans-serif;text-align:center;">
-        <h2>⏰ Tempo diário esgotado</h2>
-        <p>Você assistiu 1 hora hoje.<br>Para acesso ilimitado, torne-se membro VIP.</p>
-        <a href="https://sites.google.com/view/teste-helyssom/pagamento-2"
-           target="_blank"
-           style="background:#007bff;color:white;padding:10px 18px;border-radius:6px;
-                  text-decoration:none;margin-top:15px;font-weight:bold;">
-           💳 Tornar-se Membro
-        </a>
-      </div>
-    `;
-  }
-
-  // se já usou o limite, bloqueia direto
-  if ((dados.tempo || 0) >= LIMITE_MS) bloquearTela();
-}
-</script>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -199,15 +21,48 @@ if (localStorage.getItem("iptv_password") === "2025") {
   <style>
     body {
       margin: 0;
-      padding-top: 30px;
+      padding-top: 50px; /* espaço para o banner + contador */
       background: #121212;
       font-family: Arial, sans-serif;
       color: white;
     }
 
-    .scrolling-text {
+    /* BARRA E CONTADOR NO TOPO */
+    #topBar {
       position: fixed;
       top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      background: rgba(0,0,0,0.7);
+      z-index: 10000;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    #progressContainer {
+      flex: 1;
+      height: 8px;
+      background: #333;
+      margin-left: 10px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: #1e90ff;
+      transition: width 0.3s;
+    }
+
+    .scrolling-text {
+      position: fixed;
+      top: 50px;
       left: 0;
       width: 100%;
       overflow: hidden;
@@ -313,6 +168,12 @@ if (localStorage.getItem("iptv_password") === "2025") {
 </head>
 <body>
 
+<!-- BARRA DE TEMPO DIÁRIO -->
+<div id="topBar">
+  <div>Tempo restante: <span id="timerDisplay">60:00</span></div>
+  <div id="progressContainer"><div id="progressBar"></div></div>
+</div>
+
 <div class="scrolling-text" id="banner">
   <span>Lista vip desativada</span>
 </div>
@@ -364,6 +225,32 @@ if (localStorage.getItem("iptv_password") === "2025") {
   const videoContainer = document.getElementById('videoContainer');
   const banner = document.getElementById('banner');
 
+  // TEMPO DIÁRIO
+  const DAILY_LIMIT_MS = 60*60*1000; // 1 hora
+  let startTime = parseInt(localStorage.getItem('dailyStartTime')) || Date.now();
+  let elapsed = parseInt(localStorage.getItem('dailyElapsed')) || 0;
+  const timerDisplay = document.getElementById('timerDisplay');
+  const progressBar = document.getElementById('progressBar');
+
+  function updateTimer() {
+    const now = Date.now();
+    const totalElapsed = elapsed + (now - startTime);
+    if(totalElapsed >= DAILY_LIMIT_MS){
+      alert('Você atingiu o limite diário de 1 hora!');
+      container.style.display = 'none';
+      senhaSection.style.display = 'flex';
+      localStorage.setItem('dailyElapsed', DAILY_LIMIT_MS);
+      return;
+    }
+    const remaining = DAILY_LIMIT_MS - totalElapsed;
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000)/1000);
+    timerDisplay.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    progressBar.style.width = `${(totalElapsed/DAILY_LIMIT_MS)*100}%`;
+    requestAnimationFrame(updateTimer);
+  }
+  requestAnimationFrame(updateTimer);
+
   senhaBtn.onclick = () => {
     const val = senhaInput.value.trim();
     if (val === '2025') {
@@ -373,6 +260,8 @@ if (localStorage.getItem("iptv_password") === "2025") {
       banner.style.display = 'block';
       setTimeout(() => banner.style.display = 'none', 30000);
       carregarLista(listaSalvaUrl);
+      startTime = Date.now();
+      localStorage.setItem('dailyStartTime', startTime);
     } else {
       alert('Senha inválida!');
     }
@@ -386,6 +275,8 @@ if (localStorage.getItem("iptv_password") === "2025") {
       banner.style.display = 'block';
       setTimeout(() => banner.style.display = 'none', 30000);
       carregarLista(listaSalvaUrl);
+      startTime = Date.now();
+      localStorage.setItem('dailyStartTime', startTime);
     }
   };
 
@@ -475,7 +366,6 @@ if (localStorage.getItem("iptv_password") === "2025") {
 
   let clapprPlayer = null;
 
-  /* 🚀 NOVA FUNÇÃO: abre Pluto TV direto no navegador */
   function playChannel(canal) {
     if (!canal.url) return;
 
@@ -484,7 +374,6 @@ if (localStorage.getItem("iptv_password") === "2025") {
       clapprPlayer = null;
     }
 
-    // Detecta se é link da Pluto TV
     const isPluto = canal.url.includes("pluto.tv");
 
     if (isPluto) {
@@ -492,10 +381,9 @@ if (localStorage.getItem("iptv_password") === "2025") {
       if (confirmOpen) {
         window.open(canal.url, "_blank");
       }
-      return; // não tenta abrir no player interno
+      return;
     }
 
-    // Caso contrário, reproduz normalmente
     videoContainer.classList.add("active");
     clapprPlayer = new Clappr.Player({
       source: canal.url,
