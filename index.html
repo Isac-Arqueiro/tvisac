@@ -236,7 +236,7 @@
     const now = Date.now();
     const totalElapsed = elapsed + (now - startTime);
     if(totalElapsed >= DAILY_LIMIT_MS){
-      alert('Você atingiu o limite diário de 1 hora!');
+      alert('Você atingiu o limite diário de 30 minutos!');
       container.style.display = 'none';
       senhaSection.style.display = 'flex';
       localStorage.setItem('dailyElapsed', DAILY_LIMIT_MS);
@@ -480,3 +480,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
