@@ -4,36 +4,76 @@
 <head>
 <script>
 // =============================
-// 👥 1️⃣ CONTADOR DE PESSOAS ONLINE (REAL via CountAPI)
+// 👥 + ⏰ CONTADOR DE ONLINE E TEMPO RESTANTE
 // =============================
 
-// Cria a caixa visual
-const onlineBox = document.createElement("div");
-onlineBox.style.cssText = `
-  position:fixed;bottom:10px;right:10px;
-  background:#111;padding:8px 14px;border-radius:6px;
-  color:white;font-size:14px;opacity:0.85;z-index:9999;
-`;
-document.body.appendChild(onlineBox);
+// seleciona o banner do topo
+const banner = document.getElementById('banner');
 
-// Chave única do seu site (pode mudar o "seusite" por outro nome)
+// cria o contador visual (online + tempo)
+const infoTopo = document.createElement("span");
+infoTopo.style.cssText = `
+  display:inline-block;
+  margin-left:20px;
+  color:#0ff;
+  font-weight:bold;
+  font-size:15px;
+  transition: all 0.3s ease;
+`;
+banner.appendChild(infoTopo);
+
+// estilo para piscar
+const styleBlink = document.createElement("style");
+styleBlink.textContent = `
+@keyframes blinkOnline {
+  0% { color: #00ff00; }
+  50% { color: #fff; }
+  100% { color: #00ff00; }
+}`;
+document.head.appendChild(styleBlink);
+
+// chave única do contador (pode trocar para seu nome)
 const siteKey = "iptvsite_online_2025";
 
-// Função para atualizar o contador em tempo real
+// variáveis do tempo de uso
+const LIMITE_MS = 60 * 60 * 1000; // 1 hora
+let restanteMinutos = 60; // começa com 60
+
+// função para atualizar o contador online
 async function atualizarOnline() {
   try {
-    // Atualiza número real de pessoas (CountAPI mantém contador)
     const res = await fetch(`https://api.countapi.xyz/hit/${siteKey}/visitas`);
     const data = await res.json();
     const visitantes = data.value;
 
-    onlineBox.textContent = `👥 Pessoas online: ${visitantes}`;
-  } catch (e) {
-    onlineBox.textContent = "👥 Online: 1";
+    atualizarDisplay(visitantes);
+  } catch {
+    atualizarDisplay(1);
   }
 }
+
+// função para atualizar texto e cor do topo
+function atualizarDisplay(visitantes) {
+  let cor = "#0ff";
+  let animacao = "none";
+
+  if (visitantes > 50) {
+    cor = "#ff4040"; // vermelho (muitos)
+    animacao = "blinkOnline 1s infinite";
+  } else if (visitantes > 30) {
+    cor = "#00ff00"; // verde piscando
+    animacao = "blinkOnline 1s infinite";
+  }
+
+  infoTopo.style.color = cor;
+  infoTopo.style.animation = animacao;
+
+  infoTopo.textContent = `👥 ${visitantes} online | 🕒 Restante: ${restanteMinutos} min`;
+}
+
+// atualiza visitantes a cada 15 segundos
 atualizarOnline();
-setInterval(atualizarOnline, 15000); // atualiza a cada 15s
+setInterval(atualizarOnline, 15000);
 
 
 
@@ -41,11 +81,11 @@ setInterval(atualizarOnline, 15000); // atualiza a cada 15s
 // ⏰ 2️⃣ BLOQUEIO DE 1 HORA POR DIA (SÓ PARA SENHA 2025)
 // =============================
 if (localStorage.getItem("iptv_password") === "2025") {
-  const LIMITE_MS = 60 * 60 * 1000; // 1 hora
   const hoje = new Date().toLocaleDateString();
   const chave = "uso_diario_iptv";
   const dados = JSON.parse(localStorage.getItem(chave) || "{}");
 
+  // zera se for novo dia
   if (dados.data !== hoje) {
     localStorage.setItem(chave, JSON.stringify({ data: hoje, tempo: 0 }));
   }
@@ -53,21 +93,25 @@ if (localStorage.getItem("iptv_password") === "2025") {
   let inicio = Date.now();
   let bloqueado = false;
 
-  function checarTempo() {
+  function atualizarTempoRestante() {
     const agora = Date.now();
-    const tempoSessao = agora - inicio;
     const dadosAtuais = JSON.parse(localStorage.getItem(chave));
-    const total = (dadosAtuais.tempo || 0) + tempoSessao;
+    const totalHoje = (dadosAtuais.tempo || 0) + (agora - inicio);
 
-    if (total >= LIMITE_MS && !bloqueado) {
+    restanteMinutos = Math.max(0, Math.ceil((LIMITE_MS - totalHoje) / 60000));
+    if (restanteMinutos <= 0 && !bloqueado) {
       bloqueado = true;
       localStorage.setItem(chave, JSON.stringify({ data: hoje, tempo: LIMITE_MS }));
       bloquearTela();
     }
   }
 
-  setInterval(checarTempo, 30000);
+  setInterval(() => {
+    atualizarTempoRestante();
+    atualizarOnline(); // também atualiza o contador junto
+  }, 15000);
 
+  // salva tempo ao sair
   window.addEventListener("beforeunload", () => {
     const tempoSessao = Date.now() - inicio;
     const dadosAtuais = JSON.parse(localStorage.getItem(chave));
@@ -92,6 +136,7 @@ if (localStorage.getItem("iptv_password") === "2025") {
     `;
   }
 
+  // se já atingiu o limite, bloqueia direto
   if ((dados.tempo || 0) >= LIMITE_MS) bloquearTela();
 }
 </script>
