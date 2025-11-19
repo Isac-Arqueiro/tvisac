@@ -51,8 +51,6 @@
       font-size: 15px;
     }
 
-    /* removido timer e barra */
-
     /* Banner */
     .scrolling-text {
       position: fixed;
@@ -288,11 +286,6 @@
 
 </div>
 
-
-<!-- ============================================================
-     SCRIPT COMPLETO (REESCRITO)
-============================================================ -->
-
 <script>
 const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
 const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
@@ -492,7 +485,9 @@ btnListaSalva.onclick = () => carregarLista(listaSalvaUrl);
 btnTodos.onclick = () => renderChannelList(allChannels);
 
 btnVip.onclick = () => {
-  window.open("https://isac-arqueiro.github.io/isacvod/", "_blank");
+  // Abre o site de Filmes/Séries em nova aba
+  const url = "https://isac-arqueiro.github.io/isacvod/";
+  window.open(url, "_blank").focus();
 };
 
 btnFavoritos.onclick = () => {
