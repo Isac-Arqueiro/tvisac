@@ -34,7 +34,7 @@
       overflow: hidden;
     }
 
-    /* Topo com Timer */
+    /* Topo */
     #topBar {
       position: fixed;
       top: 0;
@@ -51,20 +51,7 @@
       font-size: 15px;
     }
 
-    #progressContainer {
-      width: 40%;
-      height: 8px;
-      background: #333;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    #progressBar {
-      height: 100%;
-      width: 0%;
-      background: #1e90ff;
-      transition: 0.3s;
-    }
+    /* removido timer e barra */
 
     /* Banner */
     .scrolling-text {
@@ -259,8 +246,7 @@
 
 <!-- TOPO -->
 <div id="topBar">
-  <div>Tempo restante: <span id="timerDisplay">60:00</span></div>
-  <div id="progressContainer"><div id="progressBar"></div></div>
+  <div>IPTV</div>
 </div>
 
 <div class="scrolling-text" id="banner">
@@ -279,7 +265,7 @@
   <div class="sidebar">
     <div class="top-buttons">
       <button id="btnListaSalva">Lista Salva</button>
-      <button id="btnVip">Lista Vip</button>
+      <button id="btnVip">Filmes / Séries</button>
       <button id="btnTodos">Todos</button>
       <button id="btnFavoritos">Favoritos</button>
     </div>
@@ -303,18 +289,13 @@
 </div>
 
 
-<script>
-/* ============================================================
-   CONFIGURAÇÕES GERAIS
-============================================================ */
+<!-- ============================================================
+     SCRIPT COMPLETO (REESCRITO)
+============================================================ -->
 
+<script>
 const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
-const vipUrls = {
-  "0001": "https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u",
-  "0002": "https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal4.m3u",
-  "0003": "https://raw.githubusercontent.com/helenfernanda/gratis/main/iptvlegal5.m3u"
-};
-const categoriasValidas = ['Classic', 'Series', 'Kids', 'Religioso', 'Variedade', 'Canal aberto', 'Esporte', 'Animação', 'RunTime', 'Filmes', 'News', 'URBAN'];
+const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
 
 let allChannels = [];
 let currentIndex = 0;
@@ -326,12 +307,14 @@ const channelList = document.getElementById("channelList");
 const banner = document.getElementById("banner");
 const videoContainer = document.getElementById("videoContainer");
 
+const btnListaSalva = document.getElementById("btnListaSalva");
+const btnVip = document.getElementById("btnVip");
+const btnTodos = document.getElementById("btnTodos");
+const btnFavoritos = document.getElementById("btnFavoritos");
+
 let clapprPlayer = null;
 
-/* ============================================================
-   LOGIN
-============================================================ */
-
+/* LOGIN */
 document.getElementById("senhaBtn").onclick = () => {
   if (senhaInput.value === "2025") {
     localStorage.setItem("iptv_password", "2025");
@@ -339,12 +322,10 @@ document.getElementById("senhaBtn").onclick = () => {
     container.style.display = "flex";
 
     banner.style.display = "block";
-    setTimeout(() => (banner.style.display = "none"), 30000);
+    setTimeout(() => banner.style.display = "none", 30000);
 
     carregarLista(listaSalvaUrl);
-  } else {
-    alert("Senha incorreta!");
-  }
+  } else alert("Senha incorreta!");
 };
 
 window.onload = () => {
@@ -355,10 +336,7 @@ window.onload = () => {
   }
 };
 
-/* ============================================================
-   CARREGAR LISTA
-============================================================ */
-
+/* CARREGAR LISTA */
 async function carregarLista(url) {
   try {
     const res = await fetch(url);
@@ -394,10 +372,7 @@ function parseM3U(txt) {
   return canais;
 }
 
-/* ============================================================
-   LISTA DE CANAIS
-============================================================ */
-
+/* LISTA DE CANAIS */
 function renderChannelList(canais) {
   channelList.innerHTML = "";
   let ultimaCategoria = "";
@@ -442,19 +417,16 @@ function toggleFavorite(name, btn) {
   } else {
     favorites.push(name);
   }
+
   localStorage.setItem("favorites", JSON.stringify(favorites));
   btn.textContent = favorites.includes(name) ? "★" : "☆";
   btn.classList.toggle("not-fav");
 }
 
-/* ============================================================
-   PLAYER — SUPORTE TOTAL HLS + FALLBACK
-============================================================ */
-
+/* PLAYER */
 function playChannel(canal) {
   if (!canal.url) return;
 
-  // destruir player anterior
   if (clapprPlayer) {
     clapprPlayer.destroy();
     clapprPlayer = null;
@@ -466,7 +438,6 @@ function playChannel(canal) {
 
   const isHls = canal.url.includes(".m3u8");
 
-  // criar elemento vídeo
   const video = document.createElement("video");
   video.controls = true;
   video.autoplay = true;
@@ -476,25 +447,19 @@ function playChannel(canal) {
 
   box.appendChild(video);
 
-  // Safari tem suporte nativo
   if (isHls && video.canPlayType("application/vnd.apple.mpegurl")) {
     video.src = canal.url;
     video.play();
     return;
   }
 
-  // HLS.js para Chrome / Android
   if (isHls && Hls.isSupported()) {
-    const hls = new Hls({
-      maxBufferLength: 30,
-      enableWorker: true
-    });
+    const hls = new Hls();
     hls.loadSource(canal.url);
     hls.attachMedia(video);
     return;
   }
 
-  // fallback Clappr
   clapprPlayer = new Clappr.Player({
     parentId: "#player",
     source: canal.url,
@@ -505,36 +470,29 @@ function playChannel(canal) {
   });
 }
 
-/* ============================================================
-   CONTROLES DO PLAYER
-============================================================ */
-
-document.getElementById("exitBtn").onclick = () => {
+/* CONTROLES */
+exitBtn.onclick = () => {
   if (clapprPlayer) clapprPlayer.destroy();
   videoContainer.classList.remove("active");
 };
 
-document.getElementById("prevBtn").onclick = () => {
+prevBtn.onclick = () => {
   currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
   playChannel(allChannels[currentIndex]);
 };
 
-document.getElementById("nextBtn").onclick = () => {
+nextBtn.onclick = () => {
   currentIndex = (currentIndex + 1) % allChannels.length;
   playChannel(allChannels[currentIndex]);
 };
 
-/* ============================================================
-   FILTROS
-============================================================ */
-
+/* BOTÕES DO MENU */
 btnListaSalva.onclick = () => carregarLista(listaSalvaUrl);
+
 btnTodos.onclick = () => renderChannelList(allChannels);
 
 btnVip.onclick = () => {
-  const senha = prompt("Senha da lista VIP:");
-  if (vipUrls[senha]) carregarLista(vipUrls[senha]);
-  else alert("Senha inválida.");
+  window.open("https://isac-arqueiro.github.io/isacvod/", "_blank");
 };
 
 btnFavoritos.onclick = () => {
@@ -545,8 +503,3 @@ btnFavoritos.onclick = () => {
 
 </body>
 </html>
-
-
-
-
-
