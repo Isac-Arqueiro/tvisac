@@ -24,6 +24,10 @@
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
+  <!-- Shaka Player + Plugin DashShakaPlayback -->
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback/dist/dash-shaka-playback.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -34,7 +38,6 @@
       overflow: hidden;
     }
 
-    /* Topo */
     #topBar {
       position: fixed;
       top: 0;
@@ -51,7 +54,6 @@
       font-size: 15px;
     }
 
-    /* Banner */
     .scrolling-text {
       position: fixed;
       top: 60px;
@@ -75,7 +77,6 @@
       100% { transform: translateX(-100%); }
     }
 
-    /* Login */
     #senhaSection {
       height: 100vh;
       display: flex;
@@ -106,7 +107,6 @@
       font-size: 15px;
     }
 
-    /* Layout Principal */
     .container {
       display: none;
       height: 100vh;
@@ -196,7 +196,6 @@
       color: #555;
     }
 
-    /* Player */
     .main {
       flex: 1;
     }
@@ -242,28 +241,23 @@
 </head>
 <body>
 
-<!-- TOPO -->
-<div id="topBar">
-  <div>IPTV</div>
-</div>
+<div id="topBar"><div>IPTV</div></div>
 
 <div class="scrolling-text" id="banner">
   <span>Lista VIP desativada</span>
 </div>
 
-<!-- LOGIN -->
 <div id="senhaSection">
   <input id="senhaInput" type="password" placeholder="Digite sua senha" />
   <button id="senhaBtn">Entrar</button>
 </div>
 
-<!-- INTERFACE PRINCIPAL -->
 <div class="container">
 
   <div class="sidebar">
     <div class="top-buttons">
       <button id="btnListaSalva">Lista Salva</button>
-      <button id="btnVip">Filmes / Séries</button>
+      <button id="btnVip">TEXTE</button>
       <button id="btnTodos">Todos</button>
       <button id="btnFavoritos">Favoritos</button>
     </div>
@@ -287,13 +281,16 @@
 </div>
 
 <script>
+/* CONFIGURAÇÕES */
 const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
 const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
+const senhasValidas = ["2025", "0001", "0002"];
 
 let allChannels = [];
 let currentIndex = 0;
 let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 
+/* ELEMENTOS */
 const senhaSection = document.getElementById("senhaSection");
 const container = document.querySelector(".container");
 const channelList = document.getElementById("channelList");
@@ -309,8 +306,12 @@ let clapprPlayer = null;
 
 /* LOGIN */
 document.getElementById("senhaBtn").onclick = () => {
-  if (senhaInput.value === "2025") {
-    localStorage.setItem("iptv_password", "2025");
+  const senha = senhaInput.value;
+
+  if (senhasValidas.includes(senha)) {
+
+    localStorage.setItem("iptv_password", senha);
+
     senhaSection.style.display = "none";
     container.style.display = "flex";
 
@@ -318,11 +319,12 @@ document.getElementById("senhaBtn").onclick = () => {
     setTimeout(() => banner.style.display = "none", 30000);
 
     carregarLista(listaSalvaUrl);
+
   } else alert("Senha incorreta!");
 };
 
 window.onload = () => {
-  if (localStorage.getItem("iptv_password") === "2025") {
+  if (senhasValidas.includes(localStorage.getItem("iptv_password"))) {
     senhaSection.style.display = "none";
     container.style.display = "flex";
     carregarLista(listaSalvaUrl);
@@ -459,7 +461,12 @@ function playChannel(canal) {
     autoPlay: true,
     width: "100%",
     height: "100%",
-    playback: { playInline: true }
+    playback: { playInline: true },
+
+    plugins: [DashShakaPlayback],
+    shakaConfiguration: {
+      streaming: { lowLatencyMode: true }
+    }
   });
 }
 
@@ -479,13 +486,12 @@ nextBtn.onclick = () => {
   playChannel(allChannels[currentIndex]);
 };
 
-/* BOTÕES DO MENU */
+/* MENU */
 btnListaSalva.onclick = () => carregarLista(listaSalvaUrl);
 
 btnTodos.onclick = () => renderChannelList(allChannels);
 
 btnVip.onclick = () => {
-  // Abre o site de Filmes/Séries em nova aba
   const url = "https://isac-arqueiro.github.io/isacvod/";
   window.open(url, "_blank").focus();
 };
