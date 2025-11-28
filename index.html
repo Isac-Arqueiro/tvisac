@@ -251,7 +251,40 @@
   <input id="senhaInput" type="password" placeholder="Digite sua senha" />
   <button id="senhaBtn">Entrar</button>
 </div>
+<div class="buttons">
+  <a href="https://sites.google.com/view/teste-helyssom/in%C3%ADcio" target="_blank">
+    <button class="btn-neon">Seja Sócio</button>
+  </a>
+</div>
 
+<style>
+  .btn-neon {
+    padding: 14px 28px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #00e5ff;
+    background: linear-gradient(145deg, #0d0d0d, #1a1a1a);
+    border: 2px solid #00e5ff;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-neon:hover {
+    background: #00e5ff;
+    color: #121212;
+    box-shadow: 0 0 15px #00e5ff, 0 0 35px #00b0ff, 0 0 55px #0091ea;
+    transform: scale(1.08);
+  }
+
+  .btn-neon:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 8px #00e5ff, 0 0 20px #00b0ff;
+  }
+</style>
 <div class="container">
 
   <div class="sidebar">
@@ -508,6 +541,7 @@ btnFavoritos.onclick = () => {
 
 </body>
 </html>
+
 
 
 
