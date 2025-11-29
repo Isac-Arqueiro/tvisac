@@ -12,13 +12,291 @@
   <meta name="theme-color" content="#1e90ff">
 
   <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("SW registrado"))
-        .catch(err => console.error("Erro SW:", err));
+<script>
+/* ==========================
+   CONFIGURAÇÕES INICIAIS
+========================== */
+
+const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
+const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
+const senhasValidas = ["2025","A0C02550","A0X02551","A0Z02552"];
+
+let allChannels = [];
+let currentIndex = 0;
+let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+const senhaSection = document.getElementById("senhaSection");
+const container = document.querySelector(".container");
+const channelList = document.getElementById("channelList");
+const videoContainer = document.getElementById("videoContainer");
+
+let clapprPlayer = null;
+
+
+/* ==========================
+   LOGIN
+========================== */
+
+document.getElementById("senhaBtn").onclick = () => {
+  const senha = document.getElementById("senhaInput").value;
+
+  if (senhasValidas.includes(senha)) {
+    localStorage.setItem("iptv_password", senha);
+
+    senhaSection.style.display = "none";
+    container.style.display = "flex";
+
+    if (senha === "2025") {
+      document.getElementById("testarGratisBtnLogin").style.display = "inline-block";
+      document.getElementById("installPWA").style.display = "inline-block";
+    } else {
+      document.getElementById("testarGratisBtnLogin").style.display = "none";
+      document.getElementById("installPWA").style.display = "none";
     }
-  </script>
+
+    carregarLista(listaSalvaUrl);
+  } else {
+    alert("Senha incorreta!");
+  }
+};
+
+// Mantém login automático
+window.onload = () => {
+  const savedSenha = localStorage.getItem("iptv_password");
+
+  if (senhasValidas.includes(savedSenha)) {
+    senhaSection.style.display = "none";
+    container.style.display = "flex";
+
+    if (savedSenha === "2025") {
+      document.getElementById("testarGratisBtnLogin").style.display = "inline-block";
+      document.getElementById("installPWA").style.display = "inline-block";
+    } else {
+      document.getElementById("testarGratisBtnLogin").style.display = "none";
+      document.getElementById("installPWA").style.display = "none";
+    }
+
+    carregarLista(listaSalvaUrl);
+  }
+};
+
+// Testar grátis
+document.getElementById("testarGratisBtnLogin").onclick = () => {
+  document.getElementById("senhaInput").value = "2025";
+  document.getElementById("senhaBtn").click();
+};
+
+
+/* ==========================
+   CARREGAR LISTA
+========================== */
+
+async function carregarLista(url) {
+  try {
+    const res = await fetch(url);
+    const data = await res.text();
+    allChannels = parseM3U(data);
+    renderChannelList(allChannels);
+  } catch {
+    alert("Erro ao carregar lista.");
+  }
+}
+
+function parseM3U(txt) {
+  const linhas = txt.split("\n");
+  let canais = [];
+  let canal = null;
+
+  for (let l of linhas) {
+    l = l.trim();
+
+    if (l.startsWith("#EXTINF")) {
+      canal = {
+        tvg_name: (l.match(/tvg-name="([^"]+)"/) || ["", "Sem Nome"])[1],
+        tvg_logo: (l.match(/tvg-logo="([^"]+)"/) || ["", ""])[1],
+        group_title: (l.match(/group-title="([^"]+)"/) || ["", "Outros"])[1],
+        url: ""
+      };
+    } else if (l && canal) {
+      canal.url = l;
+      canais.push(canal);
+      canal = null;
+    }
+  }
+  return canais;
+}
+
+
+/* ==========================
+   LISTAGEM DE CANAIS
+========================== */
+
+function renderChannelList(canais) {
+  channelList.innerHTML = "";
+  let ultimaCategoria = "";
+
+  canais.forEach((canal, index) => {
+
+    // Título da categoria
+    if (categoriasValidas.includes(canal.group_title) && canal.group_title !== ultimaCategoria) {
+      const cat = document.createElement("div");
+      cat.className = "category-label";
+      cat.textContent = canal.group_title;
+      channelList.appendChild(cat);
+      ultimaCategoria = canal.group_title;
+    }
+
+    // Item do canal
+    const div = document.createElement("div");
+    div.className = "channel";
+    div.dataset.index = index;
+
+    div.onclick = () => {
+      currentIndex = index;
+      playChannel(canal);
+    };
+
+    div.innerHTML = `
+      <img src="${canal.tvg_logo || 'https://via.placeholder.com/50'}">
+      <span class="channel-name">${canal.tvg_name}</span>
+      <button class="favorite-btn ${favorites.includes(canal.tvg_name) ? "" : "not-fav"}">
+        ${favorites.includes(canal.tvg_name) ? "★" : "☆"}
+      </button>
+    `;
+
+    div.querySelector("button").onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(canal.tvg_name, e.target);
+    };
+
+    channelList.appendChild(div);
+  });
+}
+
+function toggleFavorite(name, btn) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(n => n !== name);
+  } else {
+    favorites.push(name);
+  }
+
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+
+  btn.textContent = favorites.includes(name) ? "★" : "☆";
+  btn.classList.toggle("not-fav");
+}
+
+
+/* ==========================
+   PLAYER
+========================== */
+
+function playChannel(canal) {
+  if (!canal.url) return;
+
+  if (clapprPlayer) clapprPlayer.destroy();
+  clapprPlayer = null;
+
+  const box = document.getElementById("player");
+  box.innerHTML = "";
+
+  videoContainer.classList.add("active");
+
+  const isHls = canal.url.includes(".m3u8");
+
+  const video = document.createElement("video");
+  video.controls = true;
+  video.autoplay = true;
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.style.background = "black";
+
+  box.appendChild(video);
+
+  if (isHls && video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = canal.url;
+    video.play();
+    return;
+  }
+
+  if (isHls && Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(canal.url);
+    hls.attachMedia(video);
+    return;
+  }
+
+  clapprPlayer = new Clappr.Player({
+    parentId: "#player",
+    source: canal.url,
+    autoPlay: true,
+    width: "100%",
+    height: "100%",
+    playback: { playInline: true }
+  });
+}
+
+// Controles
+document.getElementById("exitBtn").onclick = () => {
+  if (clapprPlayer) clapprPlayer.destroy();
+  videoContainer.classList.remove("active");
+};
+
+document.getElementById("prevBtn").onclick = () => {
+  currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+
+document.getElementById("nextBtn").onclick = () => {
+  currentIndex = (currentIndex + 1) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
+
+
+/* ==========================
+   MENU
+========================== */
+
+document.getElementById("btnListaSalva").onclick = () => carregarLista(listaSalvaUrl);
+document.getElementById("btnTodos").onclick = () => renderChannelList(allChannels);
+document.getElementById("btnVip").onclick = () => window.open("https://isac-arqueiro.github.io/isacvod/", "_blank");
+document.getElementById("btnFavoritos").onclick = () => renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
+
+
+/* ==========================
+   PWA (CORRIGIDO)
+========================== */
+
+let deferredPrompt;
+const installBtn = document.getElementById("installPWA");
+
+// Evento de instalação
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = "inline-block";
+});
+
+// Botão instalar
+installBtn.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const escolha = await deferredPrompt.userChoice;
+
+  console.log("Instalação:", escolha.outcome);
+
+  deferredPrompt = null;
+  installBtn.style.display = "none";
+});
+
+// Registrar o Service Worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("Service Worker registrado"))
+    .catch(err => console.error("Erro no SW:", err));
+}
+</script>
 
   <!-- Clappr + HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
@@ -109,14 +387,6 @@
     </div>
   </div>
 </div>
-
-<script>
-const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
-const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
-const senhasValidas = ["2025","A0C02550","A0X02551","A0Z02552"];
-let allChannels = [], currentIndex=0, favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
-const senhaSection=document.getElementById("senhaSection"), container=document.querySelector(".container"), channelList=document.getElementById("channelList"), banner=document.getElementById("banner"), videoContainer=document.getElementById("videoContainer");
-let clapprPlayer=null;
 
 // LOGIN
 document.getElementById("senhaBtn").onclick=()=> {
@@ -267,5 +537,6 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 
