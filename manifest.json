@@ -1,6 +1,6 @@
 {
-  "name": "Player IPTV",
-  "short_name": "IPTV Player",
+  "name": "IPTV Player",
+  "short_name": "IPTV",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#101010",
