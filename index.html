@@ -44,6 +44,24 @@
 <!-- TELA DE LOGIN -->
 <div id="senhaSection">
   <div style="max-width:480px; background:#111; padding:15px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,0.7); color:#fff; font-family:Arial,sans-serif; line-height:1.4; font-size:13px;">
+    <script>
+  // Seleciona o container do título "Bem-vindo!"
+  const titulo = document.querySelector("#senhaSection h2");
+  
+  if(titulo){
+    const img = document.createElement("img");
+    img.src = "https://i.imgur.com/jFQiZvL.jpeg";
+    img.alt = "Logo";
+    img.style.width = "100px";
+    img.style.height = "100px";
+    img.style.borderRadius = "50%";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    img.style.margin = "0 auto 10px auto"; // centraliza e dá espaço abaixo
+    // Insere a imagem **antes** do título
+    titulo.parentNode.insertBefore(img, titulo);
+  }
+</script>
     <h2 style="color:#1e90ff; text-align:center; margin-bottom:10px; font-size:18px;">Bem-vindo!</h2>
     <p>Aqui você encontra uma seleção <strong>exclusiva de canais abertos</strong>, escolhidos com cuidado.</p>
     <p>Aproveite os canais, navegue à vontade e, se puder, apoie o projeto.</p>
@@ -249,3 +267,4 @@ document.getElementById("btnFavoritos").onclick = () => renderChannelList(allCha
 </script>
 </body>
 </html>
+
