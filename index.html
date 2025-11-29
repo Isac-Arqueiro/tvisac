@@ -1,6 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head> 
   <meta charset="UTF-8">
   <title>Site em Teste</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,64 +30,267 @@
   <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback/dist/dash-shaka-playback.min.js"></script>
 
   <style>
-    body { margin:0; padding-top:60px; background:#101010; font-family:Arial,sans-serif; color:#fff; overflow:hidden; }
-    #topBar { position:fixed; top:0; left:0; height:60px; width:100%; background:#000000aa; display:flex; align-items:center; padding:0 15px; justify-content:space-between; z-index:10000; backdrop-filter: blur(4px); font-size:15px; }
-    .scrolling-text { position:fixed; top:60px; width:100%; height:40px; background:#0006; overflow:hidden; z-index:9990; display:none; }
-    .scrolling-text span { display:inline-block; white-space:nowrap; animation:scroll-left 30s linear infinite; padding-left:100%; }
-    @keyframes scroll-left { 0%{transform:translateX(0);}100%{transform:translateX(-100%);} }
-    #senhaSection { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#000; text-align:center; padding:20px; gap:15px; overflow-y:auto; }
-    #senhaInput { padding:12px; width:260px; text-align:center; border-radius:6px; border:none; background:#222; color:#fff; }
-    #senhaBtn { margin-top:10px; padding:10px 20px; background:#1e90ff; border:none; color:#fff; border-radius:6px; cursor:pointer; font-size:15px; }
-    .btn-neon { padding:14px 28px; font-size:17px; font-weight:bold; color:#00e5ff; background:linear-gradient(145deg,#0d0d0d,#1a1a1a); border:2px solid #00e5ff; border-radius:14px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 12px rgba(0,229,255,0.3); text-transform:uppercase; letter-spacing:1px; margin-top:15px; }
-    .btn-neon:hover { background:#00e5ff; color:#121212; box-shadow:0 0 15px #00e5ff,0 0 35px #00b0ff,0 0 55px #0091ea; transform:scale(1.08); }
-    .btn-neon:active { transform:scale(0.96); box-shadow:0 0 8px #00e5ff,0 0 20px #00b0ff; }
-    .container { display:none; height:100vh; flex-direction:row; }
-    .sidebar { width:290px; background:#0d0d0d; border-right:1px solid #222; overflow-y:auto; padding:15px; }
-    .top-buttons button { width:100%; padding:10px; margin-bottom:8px; background:#181818; border:1px solid #333; border-radius:8px; cursor:pointer; color:#fff; font-weight:bold; transition:0.2s; }
-    .top-buttons button:hover { background:#1e90ff33; border-color:#1e90ff; }
-    h2 { margin-top:15px; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:6px; }
-    .category-label { background:linear-gradient(to right,#1e90ff55,#0000); padding:6px 8px; margin-top:10px; border-left:3px solid #1e90ff; border-radius:4px; font-size:14px; }
-    .channel { display:flex; align-items:center; padding:10px; margin-top:5px; border-radius:8px; cursor:pointer; transition:0.15s; }
-    .channel:hover { background:#1e1e1e; transform:translateX(4px); }
-    .channel img { width:50px; height:50px; margin-right:12px; border-radius:6px; border:1px solid #444; }
-    .channel-name { flex:1; font-size:15px; }
-    .favorite-btn { font-size:20px; background:none; border:none; cursor:pointer; color:gold; }
-    .favorite-btn.not-fav { color:#555; }
-    .main { flex:1; }
-    #videoContainer { width:100%; height:100vh; background:#000; display:none; border-left:2px solid #1e90ff; }
-    #videoContainer.active { display:block; }
-    #player { width:100%; height:100%; }
-    .player-controls { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:5; display:flex; gap:10px; }
-    .player-controls button { padding:6px 12px; border-radius:6px; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); color:#fff; border:1px solid #333; cursor:pointer; }
+    body {
+      margin: 0;
+      padding-top: 60px;
+      background: #101010;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #topBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 60px;
+      width: 100%;
+      background: #000000aa;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      justify-content: space-between;
+      z-index: 10000;
+      backdrop-filter: blur(4px);
+      font-size: 15px;
+    }
+
+    .scrolling-text {
+      position: fixed;
+      top: 60px;
+      width: 100%;
+      height: 40px;
+      background: #0006;
+      overflow: hidden;
+      z-index: 9990;
+      display: none;
+    }
+
+    .scrolling-text span {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scroll-left 30s linear infinite;
+      padding-left: 100%;
+    }
+
+    @keyframes scroll-left {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    #senhaSection {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+
+    #senhaInput {
+      padding: 12px;
+      width: 260px;
+      text-align: center;
+      border-radius: 6px;
+      border: none;
+      background: #222;
+      color: #fff;
+    }
+
+    #senhaBtn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #1e90ff;
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .container {
+      display: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 290px;
+      background: #0d0d0d;
+      border-right: 1px solid #222;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .top-buttons button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #181818;
+      border: 1px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .top-buttons button:hover {
+      background: #1e90ff33;
+      border-color: #1e90ff;
+    }
+
+    h2 {
+      margin-top: 15px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 6px;
+    }
+
+    .category-label {
+      background: linear-gradient(to right, #1e90ff55, #0000);
+      padding: 6px 8px;
+      margin-top: 10px;
+      border-left: 3px solid #1e90ff;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .channel {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .channel:hover {
+      background: #1e1e1e;
+      transform: translateX(4px);
+    }
+
+    .channel img {
+      width: 50px;
+      height: 50px;
+      margin-right: 12px;
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+
+    .channel-name {
+      flex: 1;
+      font-size: 15px;
+    }
+
+    .favorite-btn {
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: gold;
+    }
+
+    .favorite-btn.not-fav {
+      color: #555;
+    }
+
+    .main {
+      flex: 1;
+    }
+
+    #videoContainer {
+      width: 100%;
+      height: 100vh;
+      background: #000;
+      display: none;
+      border-left: 2px solid #1e90ff;
+    }
+
+    #videoContainer.active {
+      display: block;
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+
+    .player-controls {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      gap: 10px;
+    }
+
+    .player-controls button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      border: 1px solid #333;
+      cursor: pointer;
+    }
+
+    /* ==== BOTÃO NEON ADICIONADO ==== */
+    .btn-neon {
+      padding: 14px 28px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #00e5ff;
+      background: linear-gradient(145deg, #0d0d0d, #1a1a1a);
+      border: 2px solid #00e5ff;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 15px;
+    }
+
+    .btn-neon:hover {
+      background: #00e5ff;
+      color: #121212;
+      box-shadow: 0 0 15px #00e5ff, 0 0 35px #00b0ff, 0 0 55px #0091ea;
+      transform: scale(1.08);
+    }
+
+    .btn-neon:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 8px #00e5ff, 0 0 20px #00b0ff;
+    }
+
   </style>
+
 </head>
 <body>
 
-<!-- TELA DE LOGIN -->
-<div id="senhaSection">
-  <div style="max-width:480px; background:#111; padding:15px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,0.7); color:#fff; font-family:Arial,sans-serif; line-height:1.4; font-size:13px;">
-    <h2 style="color:#1e90ff; text-align:center; margin-bottom:10px; font-size:18px;">Bem-vindo!</h2>
-    <p>Aqui você encontra uma seleção <strong>exclusiva de canais abertos</strong>, escolhidos com cuidado para oferecer qualidade, estabilidade e praticidade.</p>
-    <p>Para manter o projeto funcionando e garantir atualizações constantes, contamos com você!<br><strong>Torne-se um Sócio Mantenedor</strong> e ajude nossa equipe.</p>
-    <p>Aproveite os canais, navegue à vontade e, se puder, apoie o projeto.<br><strong>Sua participação faz toda a diferença!</strong></p>
+<div id="topBar"><div>IPTV</div></div>
 
-    <!-- BOTÕES VISÍVEIS NA TELA DE LOGIN -->
-    <button id="testarGratisBtnLogin" class="btn-neon">Testar Grátis</button>
-    <a href="https://sites.google.com/view/teste-helyssom/in%C3%ADcio" target="_blank">
-      <button class="btn-neon" style="font-size:13px; padding:10px 20px; margin-top:10px;">Seja Sócio</button>
-    </a>
-    <button id="installPWA" class="btn-neon" style="display:none; margin-top:10px;">Instalar APP</button>
-  </div>
-
-  <!-- FORMULÁRIO DE LOGIN -->
-  <div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:15px;">
-    <input id="senhaInput" type="password" placeholder="Digite sua senha">
-    <button id="senhaBtn">Entrar</button>
-  </div>
+<div class="scrolling-text" id="banner">
+  <span>Lista VIP desativada</span>
 </div>
 
-<!-- CONTAINER PRINCIPAL -->
+<!-- TELA DE LOGIN COM BOTÃO NOVO -->
+<div id="senhaSection">
+  <input id="senhaInput" type="password" placeholder="Digite sua senha" />
+  <button id="senhaBtn">Entrar</button>
+
+  <!-- BOTÃO PARA NÃO ASSOCIADOS -->
+  <a href="https://sites.google.com/view/teste-helyssom/in%C3%ADcio" target="_blank">
+    <button class="btn-neon">Seja Sócio</button>
+  </a>
+</div>
+
 <div class="container">
+
   <div class="sidebar">
     <div class="top-buttons">
       <button id="btnListaSalva">Lista Salva</button>
@@ -94,6 +298,7 @@
       <button id="btnTodos">Todos</button>
       <button id="btnFavoritos">Favoritos</button>
     </div>
+
     <h2>CANAIS</h2>
     <div id="channelList"></div>
   </div>
@@ -101,6 +306,7 @@
   <div class="main">
     <div id="videoContainer">
       <div id="player"></div>
+
       <div class="player-controls">
         <button id="prevBtn">⏮️</button>
         <button id="nextBtn">⏭️</button>
@@ -108,138 +314,235 @@
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
+/* CONFIGURAÇÕES */
 const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
 const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
-const senhasValidas = ["2025","A0C02550","A0X02551","A0Z02552"];
-let allChannels = [], currentIndex=0, favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
-const senhaSection=document.getElementById("senhaSection"), container=document.querySelector(".container"), channelList=document.getElementById("channelList"), banner=document.getElementById("banner"), videoContainer=document.getElementById("videoContainer");
-let clapprPlayer=null;
+const senhasValidas = ["2025", "A0C02550","A0X02551","A0Z02552","A0A02553","A0S02554","A0D02555","A0F02556","A0G02557","A0H02558","A0J02559",
+ "A0K02560","A0L02561","A0Q02562","A0W02563","A0E02564","A0R02565","A0T02566","A0Y02567","A0U02568","A0I02569",
+ "A0O02570","A0P02571","A0A02572","A0S02573","A0D02574","A0F02575","A0G02576","A0H02577","A0J02578","A0K02579",
+ "A0L02580","A002581","A002582","A002583","A002584","A0Z02585","A0X02586","A0C02587","A0V02588","A0B02589",
+ "A0B02590","A0N02591","A0M02592","A0Q02593","A0W02594","A0E02595"];
 
-// LOGIN
-document.getElementById("senhaBtn").onclick=()=> {
-  const senha = document.getElementById("senhaInput").value;
-  if(senhasValidas.includes(senha)){
+let allChannels = [];
+let currentIndex = 0;
+let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+/* ELEMENTOS */
+const senhaSection = document.getElementById("senhaSection");
+const container = document.querySelector(".container");
+const channelList = document.getElementById("channelList");
+const banner = document.getElementById("banner");
+const videoContainer = document.getElementById("videoContainer");
+
+const btnListaSalva = document.getElementById("btnListaSalva");
+const btnVip = document.getElementById("btnVip");
+const btnTodos = document.getElementById("btnTodos");
+const btnFavoritos = document.getElementById("btnFavoritos");
+
+let clapprPlayer = null;
+
+/* LOGIN */
+document.getElementById("senhaBtn").onclick = () => {
+  const senha = senhaInput.value;
+
+  if (senhasValidas.includes(senha)) {
+
     localStorage.setItem("iptv_password", senha);
-    senhaSection.style.display="none";
-    container.style.display="flex";
 
-    if(senha==="2025"){
-      document.getElementById("testarGratisBtnLogin").style.display="inline-block";
-      document.getElementById("installPWA").style.display="inline-block";
-    } else {
-      document.getElementById("testarGratisBtnLogin").style.display="none";
-      document.getElementById("installPWA").style.display="none";
-    }
+    senhaSection.style.display = "none";
+    container.style.display = "flex";
 
-    banner.style.display="block";
-    setTimeout(()=>banner.style.display="none",30000);
+    banner.style.display = "block";
+    setTimeout(() => banner.style.display = "none", 30000);
+
     carregarLista(listaSalvaUrl);
+
   } else alert("Senha incorreta!");
-}
+};
 
-// Manter login se já tiver senha salva
-window.onload = ()=>{
-  const savedSenha = localStorage.getItem("iptv_password");
-  if(senhasValidas.includes(savedSenha)){
-    senhaSection.style.display="none";
-    container.style.display="flex";
-    if(savedSenha==="2025"){
-      document.getElementById("testarGratisBtnLogin").style.display="inline-block";
-      document.getElementById("installPWA").style.display="inline-block";
-    } else {
-      document.getElementById("testarGratisBtnLogin").style.display="none";
-      document.getElementById("installPWA").style.display="none";
-    }
+window.onload = () => {
+  if (senhasValidas.includes(localStorage.getItem("iptv_password"))) {
+    senhaSection.style.display = "none";
+    container.style.display = "flex";
     carregarLista(listaSalvaUrl);
+  }
+};
+
+/* CARREGAR LISTA */
+async function carregarLista(url) {
+  try {
+    const res = await fetch(url);
+    const data = await res.text();
+    allChannels = parseM3U(data);
+    renderChannelList(allChannels);
+  } catch {
+    alert("Erro ao carregar lista.");
   }
 }
 
-// Testar grátis
-document.getElementById("testarGratisBtnLogin").onclick=()=> {
-  document.getElementById("senhaInput").value="2025";
-  document.getElementById("senhaBtn").click();
-}
+function parseM3U(txt) {
+  const linhas = txt.split("\n");
+  const canais = [];
+  let canal = null;
 
-// CARREGAR LISTA
-async function carregarLista(url){
-  try{
-    const res=await fetch(url);
-    const data=await res.text();
-    allChannels=parseM3U(data);
-    renderChannelList(allChannels);
-  }catch{ alert("Erro ao carregar lista."); }
-}
+  for (let l of linhas) {
+    l = l.trim();
 
-function parseM3U(txt){
-  const linhas=txt.split("\n"); let canais=[]; let canal=null;
-  for(let l of linhas){ l=l.trim();
-    if(l.startsWith("#EXTINF")) canal={ tvg_name:(l.match(/tvg-name="([^"]+)"/)||["","Sem Nome"])[1], tvg_logo:(l.match(/tvg-logo="([^"]+)"/)||["",""])[1], group_title:(l.match(/group-title="([^"]+)"/)||["","Outros"])[1], url:""};
-    else if(l && canal){ canal.url=l; canais.push(canal); canal=null; }
+    if (l.startsWith("#EXTINF")) {
+      canal = {
+        tvg_name: (l.match(/tvg-name="([^"]+)"/) || ["","Sem Nome"])[1],
+        tvg_logo: (l.match(/tvg-logo="([^"]+)"/) || ["",""])[1],
+        group_title: (l.match(/group-title="([^"]+)"/) || ["","Outros"])[1],
+        url: ""
+      };
+    } else if (l && canal) {
+      canal.url = l;
+      canais.push(canal);
+      canal = null;
+    }
   }
   return canais;
 }
 
-function renderChannelList(canais){
-  channelList.innerHTML=""; let ultimaCategoria="";
-  canais.forEach((canal,index)=>{
-    if(categoriasValidas.includes(canal.group_title)&&canal.group_title!==ultimaCategoria){
-      const cat=document.createElement("div"); cat.className="category-label"; cat.textContent=canal.group_title; channelList.appendChild(cat); ultimaCategoria=canal.group_title;
+/* LISTA DE CANAIS */
+function renderChannelList(canais) {
+  channelList.innerHTML = "";
+  let ultimaCategoria = "";
+
+  canais.forEach((canal, index) => {
+    if (categoriasValidas.includes(canal.group_title) && canal.group_title !== ultimaCategoria) {
+      const cat = document.createElement("div");
+      cat.className = "category-label";
+      cat.textContent = canal.group_title;
+      channelList.appendChild(cat);
+      ultimaCategoria = canal.group_title;
     }
-    const div=document.createElement("div"); div.className="channel"; div.dataset.index=index; div.onclick=()=>{ currentIndex=index; playChannel(canal); };
-    div.innerHTML=`<img src="${canal.tvg_logo||'https://via.placeholder.com/50'}"><span class="channel-name">${canal.tvg_name}</span><button class="favorite-btn ${favorites.includes(canal.tvg_name)?"":"not-fav"}">${favorites.includes(canal.tvg_name)?"★":"☆"}</button>`;
-    div.querySelector("button").onclick=(e)=>{ e.stopPropagation(); toggleFavorite(canal.tvg_name,e.target); };
+
+    const div = document.createElement("div");
+    div.className = "channel";
+    div.dataset.index = index;
+    div.onclick = () => {
+      currentIndex = index;
+      playChannel(canal);
+    };
+
+    div.innerHTML = `
+      <img src="${canal.tvg_logo || "https://via.placeholder.com/50"}">
+      <span class="channel-name">${canal.tvg_name}</span>
+      <button class="favorite-btn ${favorites.includes(canal.tvg_name) ? "" : "not-fav"}">
+        ${favorites.includes(canal.tvg_name) ? "★" : "☆"}
+      </button>
+    `;
+
+    div.querySelector("button").onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(canal.tvg_name, e.target);
+    };
+
     channelList.appendChild(div);
   });
 }
 
-function toggleFavorite(name,btn){
-  if(favorites.includes(name)) favorites=favorites.filter(n=>n!==name);
-  else favorites.push(name);
-  localStorage.setItem("favorites",JSON.stringify(favorites));
-  btn.textContent=favorites.includes(name)?"★":"☆";
+function toggleFavorite(name, btn) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(n => n !== name);
+  } else {
+    favorites.push(name);
+  }
+
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  btn.textContent = favorites.includes(name) ? "★" : "☆";
   btn.classList.toggle("not-fav");
 }
 
-function playChannel(canal){
-  if(!canal.url) return;
-  if(clapprPlayer) clapprPlayer.destroy(); clapprPlayer=null;
-  const box=document.getElementById("player"); box.innerHTML=""; videoContainer.classList.add("active");
-  const isHls=canal.url.includes(".m3u8"); const video=document.createElement("video"); video.controls=true; video.autoplay=true; video.style.width="100%"; video.style.height="100%; background:black"; box.appendChild(video);
-  if(isHls && video.canPlayType("application/vnd.apple.mpegurl")){ video.src=canal.url; video.play(); return; }
-  if(isHls && Hls.isSupported()){ const hls=new Hls(); hls.loadSource(canal.url); hls.attachMedia(video); return; }
-  clapprPlayer=new Clappr.Player({ parentId:"#player", source:canal.url, autoPlay:true, width:"100%", height:"100%", playback:{ playInline:true }, plugins:[DashShakaPlayback], shakaConfiguration:{ streaming:{ lowLatencyMode:true } } });
+/* PLAYER */
+function playChannel(canal) {
+  if (!canal.url) return;
+
+  if (clapprPlayer) {
+    clapprPlayer.destroy();
+    clapprPlayer = null;
+  }
+
+  const box = document.getElementById("player");
+  box.innerHTML = "";
+  videoContainer.classList.add("active");
+
+  const isHls = canal.url.includes(".m3u8");
+
+  const video = document.createElement("video");
+  video.controls = true;
+  video.autoplay = true;
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.style.background = "black";
+
+  box.appendChild(video);
+
+  if (isHls && video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = canal.url;
+    video.play();
+    return;
+  }
+
+  if (isHls && Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(canal.url);
+    hls.attachMedia(video);
+    return;
+  }
+
+  clapprPlayer = new Clappr.Player({
+    parentId: "#player",
+    source: canal.url,
+    autoPlay: true,
+    width: "100%",
+    height: "100%",
+    playback: { playInline: true },
+
+    plugins: [DashShakaPlayback],
+    shakaConfiguration: {
+      streaming: { lowLatencyMode: true }
+    }
+  });
 }
 
-// CONTROLES
-document.getElementById("exitBtn").onclick=()=>{ if(clapprPlayer) clapprPlayer.destroy(); videoContainer.classList.remove("active"); };
-document.getElementById("prevBtn").onclick=()=>{ currentIndex=(currentIndex-1+allChannels.length)%allChannels.length; playChannel(allChannels[currentIndex]); };
-document.getElementById("nextBtn").onclick=()=>{ currentIndex=(currentIndex+1)%allChannels.length; playChannel(allChannels[currentIndex]); };
+/* CONTROLES */
+exitBtn.onclick = () => {
+  if (clapprPlayer) clapprPlayer.destroy();
+  videoContainer.classList.remove("active");
+};
 
-// MENU
-document.getElementById("btnListaSalva").onclick=()=> carregarLista(listaSalvaUrl);
-document.getElementById("btnTodos").onclick=()=> renderChannelList(allChannels);
-document.getElementById("btnVip").onclick=()=> window.open("https://isac-arqueiro.github.io/isacvod/","_blank").focus();
-document.getElementById("btnFavoritos").onclick=()=> renderChannelList(allChannels.filter(c=>favorites.includes(c.tvg_name)));
+prevBtn.onclick = () => {
+  currentIndex = (currentIndex - 1 + allChannels.length) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
 
-// ===== PWA =====
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
+nextBtn.onclick = () => {
+  currentIndex = (currentIndex + 1) % allChannels.length;
+  playChannel(allChannels[currentIndex]);
+};
 
-const installBtn = document.getElementById("installPWA");
-installBtn.addEventListener('click', async () => {
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  installBtn.style.display = "none";
-});
+/* MENU */
+btnListaSalva.onclick = () => carregarLista(listaSalvaUrl);
+
+btnTodos.onclick = () => renderChannelList(allChannels);
+
+btnVip.onclick = () => {
+  const url = "https://isac-arqueiro.github.io/isacvod/";
+  window.open(url, "_blank").focus();
+};
+
+btnFavoritos.onclick = () => {
+  const favs = allChannels.filter(c => favorites.includes(c.tvg_name));
+  renderChannelList(favs);
+};
 </script>
 
 </body>
 </html>
+
