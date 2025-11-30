@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,17 +12,6 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback/dist/dash-shaka-playback.min.js"></script>
-
-  <!-- SERVICE WORKER (estava dentro do <style>, erro corrigido) -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js")
-          .then(() => console.log("Service Worker registrado!"))
-          .catch(err => console.log("Erro SW:", err));
-      });
-    }
-  </script>
 
   <style>
     body { margin:0; padding-top:60px; background:#101010; font-family:Arial,sans-serif; color:#fff; overflow:hidden; }
@@ -95,8 +85,11 @@
   </div>
 </div>
 
-<!-- SCRIPTS DO PLAYER -->
+<!-- SEUS SCRIPTS EXISTENTES -->
 <script>
+/* =======================
+   CONFIGURAÇÕES
+======================= */
 const listaSalvaUrl = "https://raw.githubusercontent.com/Isac-Arqueiro/vip01/refs/heads/main/canais";
 const categoriasValidas = ['Classic','Series','Kids','Religioso','Variedade','Canal aberto','Esporte','Animação','RunTime','Filmes','News','URBAN'];
 const senhasValidas = ["2025","A0C02550","A0X02551","A0Z02552"];
@@ -106,7 +99,9 @@ let currentIndex = 0;
 let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 let clapprPlayer = null;
 
-/* LOGIN */
+/* =======================
+   LOGIN
+======================= */
 const senhaSection = document.getElementById("senhaSection");
 const container = document.querySelector(".container");
 
@@ -130,7 +125,9 @@ window.onload = () => {
   if (senhasValidas.includes(savedSenha)) entrar(savedSenha);
 };
 
-/* CARREGAR LISTA */
+/* =======================
+   CARREGAR LISTA
+======================= */
 async function carregarLista(url) {
   try {
     const res = await fetch(url);
@@ -202,7 +199,9 @@ function toggleFavorite(name, btn) {
   btn.classList.toggle("not-fav");
 }
 
-/* PLAYER */
+/* =======================
+   PLAYER
+======================= */
 const videoContainer = document.getElementById("videoContainer");
 
 function playChannel(canal) {
@@ -251,7 +250,7 @@ document.getElementById("btnVip").onclick = () => window.open("https://isac-arqu
 document.getElementById("btnFavoritos").onclick = () => renderChannelList(allChannels.filter(c => favorites.includes(c.tvg_name)));
 </script>
 
-<!-- LOGO NO LOGIN -->
+<!-- SCRIPT PARA ADICIONAR A IMAGEM ACIMA DO "Bem-vindo!" -->
 <script>
   const titulo = document.querySelector("#senhaSection h2");
   if(titulo){
