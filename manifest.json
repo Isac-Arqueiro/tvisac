@@ -1,20 +1,22 @@
 {
-  "name": "IPTV Player",
-  "short_name": "IPTV",
+  "name": "Player IPTV",
+  "short_name": "Player",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#101010",
-  "theme_color": "#1e90ff",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://i.imgur.com/jFQiZvL.jpeg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
       "src": "https://i.imgur.com/jFQiZvL.jpeg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }
